@@ -29,7 +29,14 @@ uvicorn app.main:app --reload
 
 API docs: `http://127.0.0.1:8000/docs`
 
-## 4) Test rapide recommandation
+## 4) Tests automatiques
+
+```bash
+cd backend
+pytest -q
+```
+
+## 5) Test rapide recommandation
 
 Requete `POST /recommander`:
 
@@ -42,7 +49,7 @@ Requete `POST /recommander`:
 }
 ```
 
-## 5) Endpoints d'administration
+## 6) Endpoints d'administration
 
 ### Centres
 - `GET /centres`
@@ -87,9 +94,13 @@ Exemple `POST /references`:
 - `backend/app/services/recommender.py`: logique de recommandation
 - `backend/app/db/models.py`: schema SQLite
 - `backend/scripts/seed_demo_data.py`: jeu de donnees initial
+- `backend/tests/conftest.py`: fixtures partages pytest
+- `backend/tests/test_admin_endpoints.py`: tests endpoints admin
+- `backend/tests/test_recommender_endpoint.py`: tests endpoint `/recommander`
+- `backend/tests/test_scoring_regression.py`: non-regression logique de score
 
 ## Roadmap
 
-1. Ajouter tests unitaires API et moteur de reco
+1. Ajouter scenarios metier avances (equite/saturation) dans les tests
 2. Ajouter simulation et environnement RL
 3. Ajouter module explicabilite et interface clinicien
