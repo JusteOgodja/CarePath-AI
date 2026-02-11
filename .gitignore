@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Models and runtime
+models/*.zip
+models/*.pt
+*.db
+
+# Tooling
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
