@@ -32,11 +32,12 @@ class Recommender:
         candidates = self.graph_service.candidate_destinations(payload.needed_speciality)
         if not candidates:
             raise ValueError("No available destination for requested speciality")
+        non_self_candidates = [node_id for node_id in candidates if node_id != payload.current_centre_id]
+        if not non_self_candidates:
+            raise ValueError("No available destination other than current centre")
 
         scored: list[CandidateScore] = []
-        for node_id in candidates:
-            if node_id == payload.current_centre_id:
-                continue
+        for node_id in non_self_candidates:
             try:
                 path, travel = self.graph_service.shortest_path(payload.current_centre_id, node_id)
             except (nx.NetworkXNoPath, nx.NodeNotFound):

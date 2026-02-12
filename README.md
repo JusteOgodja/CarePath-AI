@@ -36,7 +36,32 @@ cd backend
 pytest -q
 ```
 
-## 5) Test rapide recommandation
+## 5) Simulation batch (pre-RL)
+
+Simulation multi-patients pour mesurer delai, saturation et equilibre des orientations.
+
+```bash
+cd backend
+python scripts/simulate_batch.py --seed-demo --patients 80 --source C_LOCAL_A --speciality maternal --severity medium --wait-increment 5 --recovery-interval 10 --recovery-amount 1
+```
+
+Mode triage de secours (evite les echecs durs en saturation):
+
+```bash
+cd backend
+python scripts/simulate_batch.py --seed-demo --patients 80 --source C_LOCAL_A --speciality maternal --severity medium --wait-increment 5 --recovery-interval 10 --recovery-amount 1 --fallback-policy force_least_loaded --fallback-overload-penalty 30
+```
+
+Metriques affichees:
+- `avg_travel_minutes`
+- `avg_wait_minutes`
+- `failure_rate`
+- `fallbacks_used`
+- `concentration_hhi` (plus faible = moins de concentration)
+- `balance_entropy` (plus eleve = meilleure repartition)
+- `failure_reasons` (diagnostic des echecs)
+
+## 6) Test rapide recommandation
 
 Requete `POST /recommander`:
 
@@ -49,7 +74,7 @@ Requete `POST /recommander`:
 }
 ```
 
-## 6) Endpoints d'administration
+## 7) Endpoints d'administration
 
 ### Centres
 - `GET /centres`
@@ -94,13 +119,15 @@ Exemple `POST /references`:
 - `backend/app/services/recommender.py`: logique de recommandation
 - `backend/app/db/models.py`: schema SQLite
 - `backend/scripts/seed_demo_data.py`: jeu de donnees initial
+- `backend/scripts/simulate_batch.py`: simulation CLI multi-patients
 - `backend/tests/conftest.py`: fixtures partages pytest
 - `backend/tests/test_admin_endpoints.py`: tests endpoints admin
 - `backend/tests/test_recommender_endpoint.py`: tests endpoint `/recommander`
 - `backend/tests/test_scoring_regression.py`: non-regression logique de score
+- `backend/tests/test_equity_saturation.py`: scenarios d'equite/saturation
 
 ## Roadmap
 
-1. Ajouter scenarios metier avances (equite/saturation) dans les tests
-2. Ajouter simulation et environnement RL
+1. Ajouter environnement Gymnasium pour comparer heuristique vs RL
+2. Ajouter premier agent RL (PPO ou DQN) + evaluation offline
 3. Ajouter module explicabilite et interface clinicien
