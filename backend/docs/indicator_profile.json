@@ -1,0 +1,24 @@
+{
+  "country_code": "KEN",
+  "profile": {
+    "beds_per_1000": 1.33,
+    "beds_per_10000": 13.3,
+    "physicians_per_1000": 0.289,
+    "maternal_mortality_ratio": 149.0,
+    "under5_mortality_rate": 39.9,
+    "recommended_case_mix": {
+      "maternal_ratio": 0.399,
+      "pediatric_ratio": 0.3995,
+      "general_ratio": 0.2015
+    },
+    "recommended_severity_mix": {
+      "severity_low_ratio": 0.3324,
+      "severity_medium_ratio": 0.4633,
+      "severity_high_ratio": 0.2043
+    }
+  },
+  "cli_examples": {
+    "calibrate_capacity": "python scripts/calibrate_capacity.py --beds-per-10000 13.300 --availability-ratio 0.8",
+    "simulate_batch": "python scripts/simulate_batch.py --case-mix-mode mixed --severity-mode mixed --maternal-ratio 0.399 --pediatric-ratio 0.3995 --general-ratio 0.2015 --severity-low-ratio 0.3324 --severity-medium-ratio 0.4633 --severity-high-ratio 0.2043"
+  }
+}

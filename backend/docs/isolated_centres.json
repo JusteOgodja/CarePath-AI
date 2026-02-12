@@ -1,0 +1,1173 @@
+{
+  "nodes_total": 1107,
+  "edges_total": 5080,
+  "specialities_checked": [
+    "maternal",
+    "pediatric",
+    "general"
+  ],
+  "isolated_count": 102,
+  "showing": 40,
+  "rows": [
+    {
+      "centre_id": "C_LOCAL_A",
+      "name": "Centre Local A",
+      "level": "primary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "C_LOCAL_B",
+      "name": "Centre Local B",
+      "level": "primary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "C_LOCAL_C",
+      "name": "Centre Local C",
+      "level": "primary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10017858455",
+      "name": "kiariua dispenary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10020668385",
+      "name": "Rimaal Community hospital",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10207262846",
+      "name": "Langata Hospital",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10742480110",
+      "name": "Tseikuru Sub county Hospital",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10745189038",
+      "name": "Kinara Hospital",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10755127960",
+      "name": "Kairungu Dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10860666188",
+      "name": "Canary Dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10865168176",
+      "name": "Saint Elizabeth Lorugum Health Centre",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10865401647",
+      "name": "Nakwamoru Health Centre",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10876458964",
+      "name": "Lodwar County Referral Hospital",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10883742550",
+      "name": "Katuluni Dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10884708882",
+      "name": "Mukong'a Dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_10965465609",
+      "name": "Kasigau Health Centre",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_11151161598",
+      "name": "ALAKAS HC I",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_11152968842",
+      "name": "Emmanuel Community Hospital",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_11364707375",
+      "name": "Iftin sub county",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_11364707385",
+      "name": "High gate health centre",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_1170757964",
+      "name": "Thunguma Medical Clinic",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_11900201544",
+      "name": "Liberty Nursing home",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_12353554560",
+      "name": "Aghakan University Hospital (Juja Branch)",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_12420982201",
+      "name": "Kithyoko Level 3 Hospital",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_12603365367",
+      "name": "Kaewa Dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_13011603462",
+      "name": "ALPHA MEDICAL CENTER",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_13050632401",
+      "name": "Hospitali",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_13305033890",
+      "name": "Unicorn Dental Clinic - Lang'ata Dental",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_13447042943",
+      "name": "Mago West Hospital",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_13447042957",
+      "name": "Chepterit Medical Centre",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_13447042965",
+      "name": "Chepkanga Health Centre",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_1367802448",
+      "name": "Mikuyuni Dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_2475402441",
+      "name": "Nyahururu General Hospital",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_2631115731",
+      "name": "Matibabu Hospital",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_2864248994",
+      "name": "kiomo dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_2864248999",
+      "name": "kyethani health centre",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_2877920993",
+      "name": "makima dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_2877935301",
+      "name": "Kakululo dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_2877935327",
+      "name": "Muliluni dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "GEO_node_2877935335",
+      "name": "Ngongoni dispensary",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1097,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    }
+  ]
+}

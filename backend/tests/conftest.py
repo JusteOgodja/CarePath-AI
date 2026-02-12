@@ -11,7 +11,7 @@ if str(ROOT) not in sys.path:
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///./test_carepath.db")
 
-from app.db.models import CentreModel, ReferenceModel, get_session, init_db
+from app.db.models import CountryIndicatorModel, CentreModel, ReferenceModel, get_session, init_db
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -22,11 +22,13 @@ def init_database() -> None:
 @pytest.fixture(autouse=True)
 def clean_db() -> None:
     with get_session() as session:
+        session.query(CountryIndicatorModel).delete()
         session.query(ReferenceModel).delete()
         session.query(CentreModel).delete()
         session.commit()
     yield
     with get_session() as session:
+        session.query(CountryIndicatorModel).delete()
         session.query(ReferenceModel).delete()
         session.query(CentreModel).delete()
         session.commit()

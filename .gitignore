@@ -18,3 +18,5 @@ models/*.pt
 # OS
 .DS_Store
 Thumbs.db
+
+.env

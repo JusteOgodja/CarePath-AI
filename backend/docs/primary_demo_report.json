@@ -8,27 +8,27 @@
     "fallbacks_used": 0,
     "failure_rate": 0.0,
     "fallback_rate": 0.0,
-    "avg_travel_minutes": 30.1,
-    "avg_wait_minutes": 33.525,
-    "avg_score": 12.585160714285717,
+    "avg_travel_minutes": 22.341666666666665,
+    "avg_wait_minutes": 47.25,
+    "avg_score": 12.51657738095238,
     "destination_counts": {
-      "H_DISTRICT_1": 34,
-      "H_REGIONAL_1": 31,
-      "H_REGIONAL_2": 29,
-      "H_MATERNAL_1": 26
+      "H_REGIONAL_2": 45,
+      "H_REGIONAL_1": 45,
+      "H_DISTRICT_1": 16,
+      "H_DISTRICT_2": 14
     },
     "destination_distribution": {
-      "H_DISTRICT_1": 34,
-      "H_REGIONAL_1": 31,
-      "H_REGIONAL_2": 29,
-      "H_MATERNAL_1": 26
+      "H_REGIONAL_2": 45,
+      "H_REGIONAL_1": 45,
+      "H_DISTRICT_1": 16,
+      "H_DISTRICT_2": 14
     },
     "fallback_destination_counts": {},
     "failure_reasons": {},
-    "concentration_hhi": 0.2523611111111111,
-    "hhi": 0.2523611111111111,
-    "balance_entropy": 0.9965840321589565,
-    "entropy_norm": 0.9965840321589565,
+    "concentration_hhi": 0.3126388888888889,
+    "hhi": 0.3126388888888889,
+    "balance_entropy": 0.905238016227271,
+    "entropy_norm": 0.905238016227271,
     "preflight": {
       "centres_total": 9,
       "source_exists": true,
@@ -36,6 +36,18 @@
     },
     "fallback_policy": "force_least_loaded",
     "policy": "heuristic",
+    "generation": {
+      "sample_source_by_catchment": true,
+      "include_legacy_sources": false,
+      "case_mix_mode": "mixed",
+      "severity_mode": "mixed",
+      "maternal_ratio": 0.35,
+      "pediatric_ratio": 0.25,
+      "general_ratio": 0.4,
+      "severity_low_ratio": 0.6,
+      "severity_medium_ratio": 0.3,
+      "severity_high_ratio": 0.1
+    },
     "shock_config": {
       "shock_every": 0,
       "shock_wait_add": 0,

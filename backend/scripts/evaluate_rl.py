@@ -27,6 +27,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--recovery-interval", type=int, default=5)
     parser.add_argument("--recovery-amount", type=int, default=2)
     parser.add_argument("--overload-penalty", type=float, default=30.0)
+    parser.add_argument("--travel-weight", type=float, default=1.0)
+    parser.add_argument("--wait-weight", type=float, default=1.0)
+    parser.add_argument("--fairness-penalty", type=float, default=0.0)
     parser.add_argument("--seed", type=int, default=42, help="Base seed for deterministic evaluation")
     return parser.parse_args()
 
@@ -40,6 +43,9 @@ def build_env(args: argparse.Namespace) -> ReferralEnv:
         recovery_interval=args.recovery_interval,
         recovery_amount=args.recovery_amount,
         overload_penalty=args.overload_penalty,
+        travel_weight=args.travel_weight,
+        wait_weight=args.wait_weight,
+        fairness_penalty=args.fairness_penalty,
     )
 
 
@@ -79,6 +85,9 @@ def main() -> None:
             "recovery_interval": args.recovery_interval,
             "recovery_amount": args.recovery_amount,
             "overload_penalty": args.overload_penalty,
+            "travel_weight": args.travel_weight,
+            "wait_weight": args.wait_weight,
+            "fairness_penalty": args.fairness_penalty,
             "seed": args.seed,
         },
         "ppo": ppo_metrics,
@@ -90,4 +99,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
