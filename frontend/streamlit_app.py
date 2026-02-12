@@ -4,10 +4,10 @@ import sys
 from pathlib import Path
 
 import networkx as nx
-import requests
 import streamlit as st
 import streamlit.components.v1 as components
 from pyvis.network import Network
+from sqlalchemy import select
 
 try:
     from streamlit_autorefresh import st_autorefresh
@@ -17,23 +17,50 @@ except Exception:  # pragma: no cover - optional dependency
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BACKEND_DIR = REPO_ROOT / "backend"
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
-st.set_page_config(page_title="CarePath AI Demo", layout="wide")
-st.title("CarePath AI - Live Demo")
+from app.db.models import CentreModel, ReferenceModel, get_session, init_db
+from app.services.recommender import Recommender
+from app.services.schemas import RecommandationRequest
+
+st.set_page_config(page_title="CarePath AI Demo (Offline)", layout="wide")
+st.title("CarePath AI - Live Demo (Offline)")
+
+init_db()
 
 
 @st.cache_data(ttl=3)
-def fetch_centres(api_base: str) -> list[dict]:
-    response = requests.get(f"{api_base}/centres", timeout=8)
-    response.raise_for_status()
-    return response.json()
+def fetch_centres_local() -> list[dict]:
+    with get_session() as session:
+        rows = session.scalars(select(CentreModel).order_by(CentreModel.id)).all()
+    return [
+        {
+            "id": row.id,
+            "name": row.name,
+            "level": row.level,
+            "specialities": [s.strip() for s in row.specialities.split(",") if s.strip()],
+            "capacity_available": int(row.capacity_available),
+            "estimated_wait_minutes": int(row.estimated_wait_minutes),
+            "catchment_population": int(row.catchment_population or 0),
+        }
+        for row in rows
+    ]
 
 
 @st.cache_data(ttl=3)
-def fetch_references(api_base: str) -> list[dict]:
-    response = requests.get(f"{api_base}/references", timeout=8)
-    response.raise_for_status()
-    return response.json()
+def fetch_references_local() -> list[dict]:
+    with get_session() as session:
+        rows = session.scalars(select(ReferenceModel).order_by(ReferenceModel.id)).all()
+    return [
+        {
+            "id": int(row.id),
+            "source_id": row.source_id,
+            "dest_id": row.dest_id,
+            "travel_minutes": int(row.travel_minutes),
+        }
+        for row in rows
+    ]
 
 
 def build_graph(centres: list[dict], refs: list[dict]) -> nx.DiGraph:
@@ -146,8 +173,33 @@ def load_primary_demo_report() -> dict | None:
         return json.load(handle)
 
 
+def load_benchmark_report() -> tuple[str | None, dict | None]:
+    candidates = [
+        BACKEND_DIR / "docs" / "final_benchmark_kenya_mapped_v3.json",
+        BACKEND_DIR / "docs" / "final_benchmark_kenya_mapped_v2.json",
+        BACKEND_DIR / "docs" / "final_benchmark_kenya.json",
+    ]
+    for path in candidates:
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as handle:
+                return str(path), json.load(handle)
+    return None, None
+
+
+def recommend_local(current_centre_id: str, speciality: str, severity: str) -> dict:
+    recommender = Recommender()
+    response = recommender.recommend(
+        RecommandationRequest(
+            patient_id="DEMO_PATIENT",
+            current_centre_id=current_centre_id,
+            needed_speciality=speciality,
+            severity=severity,
+        )
+    )
+    return response.model_dump()
+
+
 with st.sidebar:
-    api_base = st.text_input("API base URL", value="http://127.0.0.1:8000")
     auto_refresh = st.checkbox("Auto refresh", value=False)
     refresh_seconds = st.slider("Refresh interval (sec)", min_value=2, max_value=30, value=5)
 
@@ -161,13 +213,13 @@ with st.sidebar:
         st.cache_data.clear()
         st.rerun()
 
-    st.caption("Assure-toi que FastAPI est lancee.")
+    st.caption("Mode offline: SQLite + Recommender local (sans API).")
 
 try:
-    centres = fetch_centres(api_base)
-    refs = fetch_references(api_base)
+    centres = fetch_centres_local()
+    refs = fetch_references_local()
 except Exception as exc:
-    st.error(f"Impossible de charger les donnees API: {exc}")
+    st.error(f"Impossible de charger les donnees locales: {exc}")
     st.stop()
 
 centre_ids = [c["id"] for c in centres]
@@ -214,20 +266,11 @@ with col_left:
     severity = st.selectbox("Severity", options=["low", "medium", "high"], index=1)
 
     if st.button("Get Recommendation", type="primary"):
-        payload = {
-            "patient_id": "DEMO_PATIENT",
-            "current_centre_id": current_centre,
-            "needed_speciality": speciality,
-            "severity": severity,
-        }
         try:
-            response = requests.post(f"{api_base}/recommander", json=payload, timeout=10)
-            if response.status_code >= 400:
-                st.error(response.text)
-            else:
-                st.session_state["recommendation"] = response.json()
+            st.session_state["recommendation"] = recommend_local(current_centre, speciality, severity)
+            st.cache_data.clear()
         except Exception as exc:
-            st.error(f"Erreur appel API: {exc}")
+            st.error(f"Erreur recommendation locale: {exc}")
 
     if st.button("Run Demo Scenario"):
         ok, output = run_primary_demo()
@@ -250,6 +293,24 @@ with col_left:
         kk2.metric("Avg Wait", f"{metrics['avg_wait_minutes']:.2f} min")
         kk3.metric("Entropy Norm", f"{metrics.get('entropy_norm', metrics.get('balance_entropy', 0.0)):.4f}")
         st.json(metrics)
+
+    st.subheader("Model Status")
+    st.success("Active production candidate: ppo_referral_kenya_mapped_v3.zip")
+
+    benchmark_path, benchmark_report = load_benchmark_report()
+    if benchmark_report:
+        st.subheader("Policy Comparison")
+        st.caption(f"Loaded benchmark report: {benchmark_path}")
+        ranking = benchmark_report.get("ranking_composite") or benchmark_report.get("ranking_reward") or []
+        if ranking:
+            best = ranking[0]
+            st.info(
+                f"Top policy: {best.get('policy', 'unknown')} | "
+                f"reward={best.get('metrics', {}).get('avg_reward_per_episode', 0):.3f} | "
+                f"hhi={best.get('metrics', {}).get('hhi', 0):.4f} | "
+                f"entropy={best.get('metrics', {}).get('entropy_norm', 0):.4f}"
+            )
+        st.json(benchmark_report.get("metrics", benchmark_report))
 
 with col_right:
     st.subheader("Referral Graph")

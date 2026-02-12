@@ -1,0 +1,288 @@
+{
+  "episodes": 30,
+  "config": {
+    "source": "GEO_node_8891905584",
+    "speciality": "maternal",
+    "patients_per_episode": 80,
+    "wait_increment": 3,
+    "recovery_interval": 5,
+    "recovery_amount": 2,
+    "overload_penalty": 30.0,
+    "seed": 42,
+    "model_path": "models\\ppo_referral_kenya.zip"
+  },
+  "composite_weights": {
+    "reward": 1.0,
+    "travel": 0.8,
+    "wait": 0.6,
+    "hhi": 0.5,
+    "entropy_gap": 0.3,
+    "overloads": 0.4
+  },
+  "metrics": {
+    "ppo": {
+      "avg_reward_per_episode": -71.64000000000092,
+      "avg_overloads_per_episode": 0.0,
+      "avg_travel": 17.375,
+      "avg_wait": 72.175,
+      "failure_rate": 0.0,
+      "fallback_rate": 0.0,
+      "entropy_norm": 0.9784541935771961,
+      "hhi": 0.2134375,
+      "destination_distribution": {
+        "GEO_node_8416005417": 600,
+        "GEO_node_6249168537": 630,
+        "GEO_node_8891939522": 480,
+        "GEO_node_7930813009": 390,
+        "GEO_node_698541835": 300
+      }
+    },
+    "heuristic": {
+      "avg_reward_per_episode": -73.5899999999999,
+      "avg_overloads_per_episode": 0.0,
+      "avg_travel": 11.0875,
+      "avg_wait": 80.9,
+      "failure_rate": 0.0,
+      "fallback_rate": 0.0,
+      "entropy_norm": 0.884443523790436,
+      "hhi": 0.26375,
+      "destination_distribution": {
+        "GEO_node_8416005417": 750,
+        "GEO_node_8891939522": 690,
+        "GEO_node_6249168537": 660,
+        "GEO_node_698541835": 150,
+        "GEO_node_7930813009": 150
+      }
+    },
+    "random": {
+      "avg_reward_per_episode": -74.23133333333318,
+      "avg_overloads_per_episode": 0.0,
+      "avg_travel": 20.941666666666666,
+      "avg_wait": 71.8475,
+      "failure_rate": 0.0,
+      "fallback_rate": 0.0,
+      "entropy_norm": 0.9996464655053436,
+      "hhi": 0.2002267361111111,
+      "destination_distribution": {
+        "GEO_node_698541835": 461,
+        "GEO_node_7930813009": 498,
+        "GEO_node_6249168537": 460,
+        "GEO_node_8891939522": 490,
+        "GEO_node_8416005417": 491
+      }
+    }
+  },
+  "ranking_reward": [
+    {
+      "policy": "ppo",
+      "metrics": {
+        "avg_reward_per_episode": -71.64000000000092,
+        "avg_overloads_per_episode": 0.0,
+        "avg_travel": 17.375,
+        "avg_wait": 72.175,
+        "failure_rate": 0.0,
+        "fallback_rate": 0.0,
+        "entropy_norm": 0.9784541935771961,
+        "hhi": 0.2134375,
+        "destination_distribution": {
+          "GEO_node_8416005417": 600,
+          "GEO_node_6249168537": 630,
+          "GEO_node_8891939522": 480,
+          "GEO_node_7930813009": 390,
+          "GEO_node_698541835": 300
+        }
+      }
+    },
+    {
+      "policy": "heuristic",
+      "metrics": {
+        "avg_reward_per_episode": -73.5899999999999,
+        "avg_overloads_per_episode": 0.0,
+        "avg_travel": 11.0875,
+        "avg_wait": 80.9,
+        "failure_rate": 0.0,
+        "fallback_rate": 0.0,
+        "entropy_norm": 0.884443523790436,
+        "hhi": 0.26375,
+        "destination_distribution": {
+          "GEO_node_8416005417": 750,
+          "GEO_node_8891939522": 690,
+          "GEO_node_6249168537": 660,
+          "GEO_node_698541835": 150,
+          "GEO_node_7930813009": 150
+        }
+      }
+    },
+    {
+      "policy": "random",
+      "metrics": {
+        "avg_reward_per_episode": -74.23133333333318,
+        "avg_overloads_per_episode": 0.0,
+        "avg_travel": 20.941666666666666,
+        "avg_wait": 71.8475,
+        "failure_rate": 0.0,
+        "fallback_rate": 0.0,
+        "entropy_norm": 0.9996464655053436,
+        "hhi": 0.2002267361111111,
+        "destination_distribution": {
+          "GEO_node_698541835": 461,
+          "GEO_node_7930813009": 498,
+          "GEO_node_6249168537": 460,
+          "GEO_node_8891939522": 490,
+          "GEO_node_8416005417": 491
+        }
+      }
+    }
+  ],
+  "ranking_composite": [
+    {
+      "policy": "ppo",
+      "metrics": {
+        "avg_reward_per_episode": -71.64000000000092,
+        "avg_overloads_per_episode": 0.0,
+        "avg_travel": 17.375,
+        "avg_wait": 72.175,
+        "failure_rate": 0.0,
+        "fallback_rate": 0.0,
+        "entropy_norm": 0.9784541935771961,
+        "hhi": 0.2134375,
+        "destination_distribution": {
+          "GEO_node_8416005417": 600,
+          "GEO_node_6249168537": 630,
+          "GEO_node_8891939522": 480,
+          "GEO_node_7930813009": 390,
+          "GEO_node_698541835": 300
+        }
+      },
+      "composite": {
+        "composite_score": 0.6913211517959081,
+        "reward_norm": 0.0,
+        "travel_norm": 0.6380549682875264,
+        "wait_norm": 0.03617785142225907,
+        "hhi_norm": 0.20796733480188262,
+        "entropy_gap_norm": 0.1839559963719676,
+        "overload_norm": 0.0
+      }
+    },
+    {
+      "policy": "random",
+      "metrics": {
+        "avg_reward_per_episode": -74.23133333333318,
+        "avg_overloads_per_episode": 0.0,
+        "avg_travel": 20.941666666666666,
+        "avg_wait": 71.8475,
+        "failure_rate": 0.0,
+        "fallback_rate": 0.0,
+        "entropy_norm": 0.9996464655053436,
+        "hhi": 0.2002267361111111,
+        "destination_distribution": {
+          "GEO_node_698541835": 461,
+          "GEO_node_7930813009": 498,
+          "GEO_node_6249168537": 460,
+          "GEO_node_8891939522": 490,
+          "GEO_node_8416005417": 491
+        }
+      },
+      "composite": {
+        "composite_score": 1.8,
+        "reward_norm": 1.0,
+        "travel_norm": 1.0,
+        "wait_norm": 0.0,
+        "hhi_norm": 0.0,
+        "entropy_gap_norm": 0.0,
+        "overload_norm": 0.0
+      }
+    },
+    {
+      "policy": "heuristic",
+      "metrics": {
+        "avg_reward_per_episode": -73.5899999999999,
+        "avg_overloads_per_episode": 0.0,
+        "avg_travel": 11.0875,
+        "avg_wait": 80.9,
+        "failure_rate": 0.0,
+        "fallback_rate": 0.0,
+        "entropy_norm": 0.884443523790436,
+        "hhi": 0.26375,
+        "destination_distribution": {
+          "GEO_node_8416005417": 750,
+          "GEO_node_8891939522": 690,
+          "GEO_node_6249168537": 660,
+          "GEO_node_698541835": 150,
+          "GEO_node_7930813009": 150
+        }
+      },
+      "composite": {
+        "composite_score": 2.1525083612039317,
+        "reward_norm": 0.7525083612039318,
+        "travel_norm": 0.0,
+        "wait_norm": 1.0,
+        "hhi_norm": 1.0,
+        "entropy_gap_norm": 1.0,
+        "overload_norm": 0.0
+      }
+    }
+  ],
+  "ranking": [
+    {
+      "policy": "ppo",
+      "metrics": {
+        "avg_reward_per_episode": -71.64000000000092,
+        "avg_overloads_per_episode": 0.0,
+        "avg_travel": 17.375,
+        "avg_wait": 72.175,
+        "failure_rate": 0.0,
+        "fallback_rate": 0.0,
+        "entropy_norm": 0.9784541935771961,
+        "hhi": 0.2134375,
+        "destination_distribution": {
+          "GEO_node_8416005417": 600,
+          "GEO_node_6249168537": 630,
+          "GEO_node_8891939522": 480,
+          "GEO_node_7930813009": 390,
+          "GEO_node_698541835": 300
+        }
+      }
+    },
+    {
+      "policy": "heuristic",
+      "metrics": {
+        "avg_reward_per_episode": -73.5899999999999,
+        "avg_overloads_per_episode": 0.0,
+        "avg_travel": 11.0875,
+        "avg_wait": 80.9,
+        "failure_rate": 0.0,
+        "fallback_rate": 0.0,
+        "entropy_norm": 0.884443523790436,
+        "hhi": 0.26375,
+        "destination_distribution": {
+          "GEO_node_8416005417": 750,
+          "GEO_node_8891939522": 690,
+          "GEO_node_6249168537": 660,
+          "GEO_node_698541835": 150,
+          "GEO_node_7930813009": 150
+        }
+      }
+    },
+    {
+      "policy": "random",
+      "metrics": {
+        "avg_reward_per_episode": -74.23133333333318,
+        "avg_overloads_per_episode": 0.0,
+        "avg_travel": 20.941666666666666,
+        "avg_wait": 71.8475,
+        "failure_rate": 0.0,
+        "fallback_rate": 0.0,
+        "entropy_norm": 0.9996464655053436,
+        "hhi": 0.2002267361111111,
+        "destination_distribution": {
+          "GEO_node_698541835": 461,
+          "GEO_node_7930813009": 498,
+          "GEO_node_6249168537": 460,
+          "GEO_node_8891939522": 490,
+          "GEO_node_8416005417": 491
+        }
+      }
+    }
+  ]
+}

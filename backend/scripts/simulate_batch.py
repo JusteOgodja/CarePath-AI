@@ -42,6 +42,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source", type=str, default="C_LOCAL_A", help="Source centre ID")
     parser.add_argument("--speciality", type=str, default="maternal", help="Requested speciality")
     parser.add_argument("--severity", type=str, default="medium", help="Patient severity (low|medium|high)")
+    parser.add_argument("--sample-source-by-catchment", action="store_true", default=False)
+    parser.add_argument(
+        "--include-legacy-sources",
+        action="store_true",
+        default=False,
+        help="Include legacy demo centres (C_LOCAL_*, H_*) in population-based source sampling",
+    )
+    parser.add_argument("--case-mix-mode", choices=["fixed", "mixed"], default="fixed")
+    parser.add_argument("--severity-mode", choices=["fixed", "mixed"], default="fixed")
+    parser.add_argument("--maternal-ratio", type=float, default=0.35)
+    parser.add_argument("--pediatric-ratio", type=float, default=0.25)
+    parser.add_argument("--general-ratio", type=float, default=0.40)
+    parser.add_argument("--severity-low-ratio", type=float, default=0.60)
+    parser.add_argument("--severity-medium-ratio", type=float, default=0.30)
+    parser.add_argument("--severity-high-ratio", type=float, default=0.10)
     parser.add_argument(
         "--policy",
         type=str,
@@ -273,6 +288,66 @@ def preflight_snapshot(source_id: str, speciality: str) -> dict:
     }
 
 
+def weighted_choice(items: list[str], weights: list[float], rng: random.Random) -> str:
+    total = sum(weights)
+    if total <= 0:
+        return rng.choice(items)
+    draw = rng.random() * total
+    cumulative = 0.0
+    for item, weight in zip(items, weights):
+        cumulative += weight
+        if draw <= cumulative:
+            return item
+    return items[-1]
+
+
+def choose_source_centre(
+    *,
+    default_source: str,
+    sample_by_catchment: bool,
+    include_legacy_sources: bool,
+    rng: random.Random,
+) -> str:
+    if not sample_by_catchment:
+        return default_source
+    with get_session() as session:
+        centres = session.scalars(select(CentreModel)).all()
+
+    def is_legacy_source(centre: CentreModel) -> bool:
+        if centre.id.startswith("C_LOCAL_") or centre.id.startswith("H_"):
+            return True
+        if centre.osm_type is None and centre.osm_id is None and (centre.lat is None or centre.lon is None):
+            return True
+        return False
+
+    if not include_legacy_sources:
+        filtered = [centre for centre in centres if not is_legacy_source(centre)]
+        if filtered:
+            centres = filtered
+
+    if not centres:
+        return default_source
+    ids = [c.id for c in centres]
+    weights = [float(c.catchment_population or 0) for c in centres]
+    return weighted_choice(ids, weights, rng)
+
+
+def choose_speciality(args: argparse.Namespace, rng: random.Random) -> str:
+    if args.case_mix_mode == "fixed":
+        return args.speciality
+    items = ["maternal", "pediatric", "general"]
+    weights = [args.maternal_ratio, args.pediatric_ratio, args.general_ratio]
+    return weighted_choice(items, weights, rng)
+
+
+def choose_severity(args: argparse.Namespace, rng: random.Random) -> str:
+    if args.severity_mode == "fixed":
+        return args.severity
+    items = ["low", "medium", "high"]
+    weights = [args.severity_low_ratio, args.severity_medium_ratio, args.severity_high_ratio]
+    return weighted_choice(items, weights, rng)
+
+
 def fallback_recommendation(
     *,
     source_id: str,
@@ -399,19 +474,28 @@ def run_simulation(args: argparse.Namespace) -> dict:
     total_score = 0.0
 
     for idx in range(1, args.patients + 1):
+        source_centre = choose_source_centre(
+            default_source=args.source,
+            sample_by_catchment=args.sample_source_by_catchment,
+            include_legacy_sources=getattr(args, "include_legacy_sources", False),
+            rng=rng,
+        )
+        speciality = choose_speciality(args, rng)
+        severity = choose_severity(args, rng)
+
         payload = RecommandationRequest(
             patient_id=f"SIM_{idx:04d}",
-            current_centre_id=args.source,
-            needed_speciality=args.speciality,
-            severity=args.severity,
+            current_centre_id=source_centre,
+            needed_speciality=speciality,
+            severity=severity,
         )
 
         try:
             if args.policy == "random":
                 random_choice = random_recommendation(
-                    source_id=args.source,
-                    speciality=args.speciality,
-                    severity=args.severity,
+                    source_id=source_centre,
+                    speciality=speciality,
+                    severity=severity,
                     rng=rng,
                 )
                 if random_choice is None:
@@ -427,9 +511,9 @@ def run_simulation(args: argparse.Namespace) -> dict:
         except ValueError as exc:
             if args.fallback_policy == "force_least_loaded":
                 fallback = fallback_recommendation(
-                    source_id=args.source,
-                    speciality=args.speciality,
-                    severity=args.severity,
+                    source_id=source_centre,
+                    speciality=speciality,
+                    severity=severity,
                     overload_penalty=args.fallback_overload_penalty,
                 )
                 if fallback is not None:
@@ -460,8 +544,8 @@ def run_simulation(args: argparse.Namespace) -> dict:
             apply_recovery(initial_caps, args.recovery_amount)
         if args.shock_every > 0 and idx % args.shock_every == 0:
             apply_random_shock(
-                source_id=args.source,
-                speciality=args.speciality,
+                source_id=source_centre,
+                speciality=speciality,
                 capacity_drop=args.shock_capacity_drop,
                 wait_add=args.shock_wait_add,
                 rng=rng,
@@ -498,6 +582,18 @@ def run_simulation(args: argparse.Namespace) -> dict:
         "preflight": snapshot,
         "fallback_policy": args.fallback_policy,
         "policy": args.policy,
+        "generation": {
+            "sample_source_by_catchment": args.sample_source_by_catchment,
+            "include_legacy_sources": getattr(args, "include_legacy_sources", False),
+            "case_mix_mode": args.case_mix_mode,
+            "severity_mode": args.severity_mode,
+            "maternal_ratio": args.maternal_ratio,
+            "pediatric_ratio": args.pediatric_ratio,
+            "general_ratio": args.general_ratio,
+            "severity_low_ratio": args.severity_low_ratio,
+            "severity_medium_ratio": args.severity_medium_ratio,
+            "severity_high_ratio": args.severity_high_ratio,
+        },
         "shock_config": {
             "shock_every": args.shock_every,
             "shock_wait_add": args.shock_wait_add,
@@ -518,6 +614,11 @@ def print_report(report: dict) -> None:
     print(f"Patients failed    : {report['patients_failed']}")
     print(f"Fallbacks used     : {report['fallbacks_used']}")
     print(f"Policy             : {report['policy']}")
+    print("Generation config  :")
+    print(f"  - sample_by_catchment : {report['generation']['sample_source_by_catchment']}")
+    print(f"  - include_legacy      : {report['generation']['include_legacy_sources']}")
+    print(f"  - case_mix_mode       : {report['generation']['case_mix_mode']}")
+    print(f"  - severity_mode       : {report['generation']['severity_mode']}")
     print(f"Fallback policy    : {report['fallback_policy']}")
     print("Shock config       :")
     print(f"  - every            : {report['shock_config']['shock_every']}")

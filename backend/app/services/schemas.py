@@ -83,3 +83,12 @@ class ReferenceResponse(BaseModel):
     source_id: str
     dest_id: str
     travel_minutes: int
+
+
+class IndicatorResponse(BaseModel):
+    country_code: str
+    indicator_code: str
+    indicator_name: str | None
+    year: int
+    value: float
+    source_file: str | None

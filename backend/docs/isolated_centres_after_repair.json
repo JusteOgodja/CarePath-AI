@@ -1,0 +1,274 @@
+{
+  "nodes_total": 1107,
+  "edges_total": 8598,
+  "specialities_checked": [
+    "maternal",
+    "pediatric",
+    "general"
+  ],
+  "isolated_count": 9,
+  "showing": 9,
+  "rows": [
+    {
+      "centre_id": "C_LOCAL_A",
+      "name": "Centre Local A",
+      "level": "primary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "C_LOCAL_B",
+      "name": "Centre Local B",
+      "level": "primary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "C_LOCAL_C",
+      "name": "Centre Local C",
+      "level": "primary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "H_DISTRICT_1",
+      "name": "Hopital District 1",
+      "level": "secondary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "H_DISTRICT_2",
+      "name": "Hopital District 2",
+      "level": "secondary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "H_MATERNAL_1",
+      "name": "Hopital Maternal 1",
+      "level": "secondary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "H_PEDIATRIC_1",
+      "name": "Hopital Pediatric 1",
+      "level": "secondary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "H_REGIONAL_1",
+      "name": "Hopital Regional 1",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    },
+    {
+      "centre_id": "H_REGIONAL_2",
+      "name": "Hopital Regional 2",
+      "level": "tertiary",
+      "out_degree": 0,
+      "reachable_nodes_total": 1,
+      "isolated_specialities": [
+        "maternal",
+        "pediatric",
+        "general"
+      ],
+      "detail": {
+        "maternal": {
+          "eligible_destinations": 13,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "pediatric": {
+          "eligible_destinations": 12,
+          "reachable_destinations": 0,
+          "isolated": true
+        },
+        "general": {
+          "eligible_destinations": 1098,
+          "reachable_destinations": 0,
+          "isolated": true
+        }
+      }
+    }
+  ]
+}

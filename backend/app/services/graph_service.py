@@ -26,10 +26,16 @@ class GraphService:
             self.graph.add_node(
                 centre.id,
                 name=centre.name,
+                lat=centre.lat,
+                lon=centre.lon,
+                osm_type=centre.osm_type,
+                osm_id=centre.osm_id,
                 level=centre.level,
                 specialities=specialities,
+                capacity_max=centre.capacity_max,
                 capacity_available=centre.capacity_available,
                 estimated_wait_minutes=centre.estimated_wait_minutes,
+                catchment_population=centre.catchment_population or 0,
             )
 
         for link in links:

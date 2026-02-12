@@ -23,8 +23,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--recovery-interval", type=int, default=5)
     parser.add_argument("--recovery-amount", type=int, default=2)
     parser.add_argument("--overload-penalty", type=float, default=30.0)
+    parser.add_argument("--travel-weight", type=float, default=1.0)
+    parser.add_argument("--wait-weight", type=float, default=1.0)
+    parser.add_argument("--fairness-penalty", type=float, default=0.0)
     parser.add_argument("--timesteps", type=int, default=20000)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
+    parser.add_argument("--ent-coef", type=float, default=0.01)
     parser.add_argument("--model-out", type=str, default="models/ppo_referral")
     parser.add_argument("--seed", type=int, default=42)
     return parser.parse_args()
@@ -45,6 +49,9 @@ def main() -> None:
         recovery_interval=args.recovery_interval,
         recovery_amount=args.recovery_amount,
         overload_penalty=args.overload_penalty,
+        travel_weight=args.travel_weight,
+        wait_weight=args.wait_weight,
+        fairness_penalty=args.fairness_penalty,
     )
 
     model = PPO(
@@ -52,6 +59,7 @@ def main() -> None:
         env,
         verbose=1,
         learning_rate=args.learning_rate,
+        ent_coef=args.ent_coef,
         n_steps=256,
         batch_size=64,
         gamma=0.99,

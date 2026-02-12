@@ -32,6 +32,9 @@ class ReferralEnv(gym.Env):
         recovery_amount: int = 2,
         overload_penalty: float = 30.0,
         reward_scale: float = 100.0,
+        travel_weight: float = 1.0,
+        wait_weight: float = 1.0,
+        fairness_penalty: float = 0.0,
     ) -> None:
         super().__init__()
         self.source_id = source_id
@@ -42,6 +45,9 @@ class ReferralEnv(gym.Env):
         self.recovery_amount = recovery_amount
         self.overload_penalty = overload_penalty
         self.reward_scale = reward_scale
+        self.travel_weight = travel_weight
+        self.wait_weight = wait_weight
+        self.fairness_penalty = fairness_penalty
 
         self.graph_service = GraphService()
         self.destinations: list[DestinationState] = []
@@ -62,6 +68,7 @@ class ReferralEnv(gym.Env):
         self.initial_capacities: list[int] = [d.initial_capacity for d in self.destinations]
 
         self.current_step = 0
+        self.destination_counts: list[int] = []
 
     def _load_destinations(self) -> None:
         self.graph_service.reload()
@@ -105,6 +112,7 @@ class ReferralEnv(gym.Env):
         self.current_step = 0
         self.capacities = [d.initial_capacity for d in self.destinations]
         self.waits = [d.initial_wait for d in self.destinations]
+        self.destination_counts = [0 for _ in self.destinations]
         return self._get_obs(), {}
 
     def _apply_recovery(self) -> None:
@@ -127,12 +135,19 @@ class ReferralEnv(gym.Env):
         cap = self.capacities[action_idx]
 
         overload = cap <= 0
-        reward = -((travel + wait) / self.reward_scale)
+        base_cost = (self.travel_weight * travel) + (self.wait_weight * wait)
+        reward = -(base_cost / self.reward_scale)
         if overload:
             reward -= self.overload_penalty / self.reward_scale
         else:
             self.capacities[action_idx] -= 1
 
+        if self.fairness_penalty > 0:
+            total_before = sum(self.destination_counts)
+            share = self.destination_counts[action_idx] / max(total_before, 1)
+            reward -= (self.fairness_penalty * share) / self.reward_scale
+
+        self.destination_counts[action_idx] += 1
         self.waits[action_idx] += self.wait_increment
 
         self.current_step += 1

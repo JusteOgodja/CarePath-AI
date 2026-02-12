@@ -1,0 +1,376 @@
+{
+  "dry_run": false,
+  "specialities": [
+    "maternal",
+    "pediatric",
+    "general"
+  ],
+  "isolated_centres_before": 102,
+  "created_edges": 186,
+  "skipped_edges": 9,
+  "targets_per_centre": 2,
+  "sample_repairs": [
+    {
+      "source_id": "GEO_node_560737725",
+      "source_name": "karurumo health centre",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_9487237401",
+        "GEO_node_560742254"
+      ]
+    },
+    {
+      "source_id": "GEO_node_949597378",
+      "source_name": "Sidarec Mukuru Community Clinic",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_949597358",
+        "GEO_node_1419101749"
+      ]
+    },
+    {
+      "source_id": "GEO_node_1170757964",
+      "source_name": "Thunguma Medical Clinic",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_11389724570",
+        "GEO_node_6215953820"
+      ]
+    },
+    {
+      "source_id": "GEO_node_1367802448",
+      "source_name": "Mikuyuni Dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_13011603462",
+        "GEO_node_12603365367"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2475402441",
+      "source_name": "Nyahururu General Hospital",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_9810458487",
+        "GEO_node_9810337113"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2631115731",
+      "source_name": "Matibabu Hospital",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_10939199235",
+        "GEO_node_11586713084"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2864248994",
+      "source_name": "kiomo dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2877935327",
+        "GEO_node_2877939679"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2864248999",
+      "source_name": "kyethani health centre",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2877935378",
+        "GEO_node_10883742550"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2877920993",
+      "source_name": "makima dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283879900",
+        "GEO_node_3283879885"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2877935301",
+      "source_name": "Kakululo dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_12420982201",
+        "GEO_node_2877935357"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2877935327",
+      "source_name": "Muliluni dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2864248994",
+        "GEO_node_2877939679"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2877935335",
+      "source_name": "Ngongoni dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2877935357",
+        "GEO_node_2877935301"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2877935357",
+      "source_name": "Thitani helath centre",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2877935335",
+        "GEO_node_2877935301"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2877935378",
+      "source_name": "itongolani dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2864248999",
+        "GEO_node_2877935381"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2877935387",
+      "source_name": "kanynga health centre",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2877935392",
+        "GEO_node_2877935327"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2877935392",
+      "source_name": "katalwa dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2877935387",
+        "GEO_node_2877935327"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2877939679",
+      "source_name": "Kiio dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2864248994",
+        "GEO_node_2877935381"
+      ]
+    },
+    {
+      "source_id": "GEO_node_2885939513",
+      "source_name": "Thiba dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283879900",
+        "GEO_node_2877920993"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3003029891",
+      "source_name": "isiolo general hospital",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283811984",
+        "GEO_node_3283811136"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3003032035",
+      "source_name": "ntirim dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283811144",
+        "GEO_node_3283812027"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3283811136",
+      "source_name": "anglican parish dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283811984",
+        "GEO_node_3283812027"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3283811144",
+      "source_name": "avi mothercare",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283812027",
+        "GEO_node_3283811136"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3283811984",
+      "source_name": "isiolo manyatta hospital",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283811136",
+        "GEO_node_3003029891"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3283812004",
+      "source_name": "Leparua dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3003032035",
+        "GEO_node_3283811144"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3283812015",
+      "source_name": "mugurnanyore simba clinic",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3003029891",
+        "GEO_node_3283811136"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3283812027",
+      "source_name": "pepo la tumaini dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283811136",
+        "GEO_node_3283811144"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3283879885",
+      "source_name": "consolata dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283879911",
+        "GEO_node_2877920993"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3283879900",
+      "source_name": "makima clinic",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2877920993",
+        "GEO_node_3283879885"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3283879911",
+      "source_name": "mbondoni dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283879885",
+        "GEO_node_2877920993"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3283879919",
+      "source_name": "mulukusi dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3283879911",
+        "GEO_node_3283879885"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3421457155",
+      "source_name": "bandari dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3421461747",
+        "GEO_node_3421461755"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3421461741",
+      "source_name": "maryango dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3421461757",
+        "GEO_node_3421461747"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3421461747",
+      "source_name": "mbazizo medical clinic",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3421457155",
+        "GEO_node_3421461755"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3421461750",
+      "source_name": "midoina dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3421461757",
+        "GEO_node_3421461741"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3421461757",
+      "source_name": "mitangani dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3421461741",
+        "GEO_node_3421461750"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3603465851",
+      "source_name": "Kilimangodo Dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_2287954594",
+        "GEO_node_1489468515"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3674800601",
+      "source_name": "Kombosang Dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3688362774",
+        "GEO_node_3674800616"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3674800616",
+      "source_name": "Likwon Dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3688362774",
+        "GEO_node_3674800601"
+      ]
+    },
+    {
+      "source_id": "GEO_node_3688362774",
+      "source_name": "kuikui health center",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_3674800616",
+        "GEO_node_3674800601"
+      ]
+    },
+    {
+      "source_id": "GEO_node_4707793154",
+      "source_name": "ndungicha dispensary",
+      "source_level": "tertiary",
+      "added_targets": [
+        "GEO_node_4707793171",
+        "GEO_node_3421461755"
+      ]
+    }
+  ],
+  "graph_nodes": 1107,
+  "graph_edges": 5266
+}

@@ -147,4 +147,4 @@ def test_recommender_ignores_current_centre_as_destination(client: TestClient) -
     )
 
     assert response.status_code == 400
-    assert "No reachable destination" in response.json()["detail"]
+    assert "No available destination" in response.json()["detail"]
