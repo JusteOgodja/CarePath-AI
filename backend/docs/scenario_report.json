@@ -1,0 +1,183 @@
+{
+  "patients": 120,
+  "scenarios": [
+    {
+      "scenario": "demo_maternal_stable",
+      "config": {
+        "source": "C_LOCAL_A",
+        "speciality": "maternal",
+        "seed_demo": true,
+        "seed_complex": false,
+        "shock_every": 0,
+        "shock_wait_add": 0,
+        "shock_capacity_drop": 0
+      },
+      "metrics": {
+        "patients_total": 120,
+        "patients_success": 120,
+        "patients_failed": 0,
+        "fallbacks_used": 18,
+        "failure_rate": 0.0,
+        "avg_travel_minutes": 36.333333333333336,
+        "avg_wait_minutes": 83.23333333333333,
+        "avg_score": 91.62791666666666,
+        "destination_counts": {
+          "H_REGIONAL_1": 56,
+          "H_DISTRICT_1": 64
+        },
+        "fallback_destination_counts": {
+          "H_DISTRICT_1": 14,
+          "H_REGIONAL_1": 4
+        },
+        "failure_reasons": {},
+        "concentration_hhi": 0.5022222222222222,
+        "balance_entropy": 0.9967916319816367,
+        "preflight": {
+          "centres_total": 4,
+          "source_exists": true,
+          "eligible_destinations": 3
+        },
+        "fallback_policy": "force_least_loaded",
+        "shock_config": {
+          "shock_every": 0,
+          "shock_wait_add": 0,
+          "shock_capacity_drop": 0,
+          "random_seed": 42
+        }
+      }
+    },
+    {
+      "scenario": "demo_maternal_shock",
+      "config": {
+        "source": "C_LOCAL_A",
+        "speciality": "maternal",
+        "seed_demo": true,
+        "seed_complex": false,
+        "shock_every": 10,
+        "shock_wait_add": 10,
+        "shock_capacity_drop": 1
+      },
+      "metrics": {
+        "patients_total": 120,
+        "patients_success": 120,
+        "patients_failed": 0,
+        "fallbacks_used": 29,
+        "failure_rate": 0.0,
+        "avg_travel_minutes": 39.541666666666664,
+        "avg_wait_minutes": 107.39166666666667,
+        "avg_score": 124.53,
+        "destination_counts": {
+          "H_REGIONAL_1": 67,
+          "H_DISTRICT_1": 53
+        },
+        "fallback_destination_counts": {
+          "H_DISTRICT_1": 12,
+          "H_REGIONAL_1": 17
+        },
+        "failure_reasons": {},
+        "concentration_hhi": 0.5068055555555555,
+        "balance_entropy": 0.9901592635041825,
+        "preflight": {
+          "centres_total": 4,
+          "source_exists": true,
+          "eligible_destinations": 3
+        },
+        "fallback_policy": "force_least_loaded",
+        "shock_config": {
+          "shock_every": 10,
+          "shock_wait_add": 10,
+          "shock_capacity_drop": 1,
+          "random_seed": 42
+        }
+      }
+    },
+    {
+      "scenario": "complex_maternal_stable",
+      "config": {
+        "source": "C_LOCAL_A",
+        "speciality": "maternal",
+        "seed_demo": false,
+        "seed_complex": true,
+        "shock_every": 0,
+        "shock_wait_add": 0,
+        "shock_capacity_drop": 0
+      },
+      "metrics": {
+        "patients_total": 120,
+        "patients_success": 120,
+        "patients_failed": 0,
+        "fallbacks_used": 0,
+        "failure_rate": 0.0,
+        "avg_travel_minutes": 30.1,
+        "avg_wait_minutes": 33.525,
+        "avg_score": 9.680892857142858,
+        "destination_counts": {
+          "H_DISTRICT_1": 34,
+          "H_REGIONAL_1": 31,
+          "H_REGIONAL_2": 29,
+          "H_MATERNAL_1": 26
+        },
+        "fallback_destination_counts": {},
+        "failure_reasons": {},
+        "concentration_hhi": 0.2523611111111111,
+        "balance_entropy": 0.9965840321589565,
+        "preflight": {
+          "centres_total": 9,
+          "source_exists": true,
+          "eligible_destinations": 6
+        },
+        "fallback_policy": "force_least_loaded",
+        "shock_config": {
+          "shock_every": 0,
+          "shock_wait_add": 0,
+          "shock_capacity_drop": 0,
+          "random_seed": 42
+        }
+      }
+    },
+    {
+      "scenario": "complex_pediatric_shock",
+      "config": {
+        "source": "C_LOCAL_B",
+        "speciality": "pediatric",
+        "seed_demo": false,
+        "seed_complex": true,
+        "shock_every": 8,
+        "shock_wait_add": 12,
+        "shock_capacity_drop": 1
+      },
+      "metrics": {
+        "patients_total": 120,
+        "patients_success": 120,
+        "patients_failed": 0,
+        "fallbacks_used": 0,
+        "failure_rate": 0.0,
+        "avg_travel_minutes": 30.116666666666667,
+        "avg_wait_minutes": 42.56666666666667,
+        "avg_score": 11.087599206349205,
+        "destination_counts": {
+          "H_DISTRICT_2": 29,
+          "H_REGIONAL_2": 32,
+          "H_REGIONAL_1": 32,
+          "H_PEDIATRIC_1": 27
+        },
+        "fallback_destination_counts": {},
+        "failure_reasons": {},
+        "concentration_hhi": 0.25125,
+        "balance_entropy": 0.9981810835662875,
+        "preflight": {
+          "centres_total": 9,
+          "source_exists": true,
+          "eligible_destinations": 6
+        },
+        "fallback_policy": "force_least_loaded",
+        "shock_config": {
+          "shock_every": 8,
+          "shock_wait_add": 12,
+          "shock_capacity_drop": 1,
+          "random_seed": 42
+        }
+      }
+    }
+  ]
+}

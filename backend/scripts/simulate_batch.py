@@ -1,5 +1,6 @@
 import argparse
 import math
+import random
 import sys
 from collections import Counter
 from dataclasses import dataclass
@@ -56,6 +57,11 @@ def parse_args() -> argparse.Namespace:
         help="Reset and seed demo network before simulation",
     )
     parser.add_argument(
+        "--seed-complex",
+        action="store_true",
+        help="Reset and seed complex network before simulation",
+    )
+    parser.add_argument(
         "--fallback-policy",
         type=str,
         choices=["none", "force_least_loaded"],
@@ -68,6 +74,15 @@ def parse_args() -> argparse.Namespace:
         default=30.0,
         help="Penalty added in fallback score when destination capacity is zero",
     )
+    parser.add_argument("--shock-every", type=int, default=0, help="Apply random shock every N patients")
+    parser.add_argument("--shock-wait-add", type=int, default=0, help="Wait minutes added during shock")
+    parser.add_argument(
+        "--shock-capacity-drop",
+        type=int,
+        default=0,
+        help="Capacity units removed during shock",
+    )
+    parser.add_argument("--random-seed", type=int, default=42, help="Random seed for shocks")
     return parser.parse_args()
 
 
@@ -127,6 +142,41 @@ def seed_demo_data() -> None:
         session.commit()
 
 
+def seed_complex_data() -> None:
+    from app.db.models import ReferenceModel
+
+    init_db()
+    with get_session() as session:
+        session.query(ReferenceModel).delete()
+        session.query(CentreModel).delete()
+
+        centres = [
+            CentreModel(id="C_LOCAL_A", name="Centre Local A", level="primary", specialities="general,maternal", capacity_available=4, estimated_wait_minutes=20),
+            CentreModel(id="C_LOCAL_B", name="Centre Local B", level="primary", specialities="general,pediatric", capacity_available=4, estimated_wait_minutes=18),
+            CentreModel(id="C_LOCAL_C", name="Centre Local C", level="primary", specialities="general,maternal,pediatric", capacity_available=3, estimated_wait_minutes=22),
+            CentreModel(id="H_DISTRICT_1", name="Hopital District 1", level="secondary", specialities="general,maternal", capacity_available=6, estimated_wait_minutes=30),
+            CentreModel(id="H_DISTRICT_2", name="Hopital District 2", level="secondary", specialities="general,pediatric", capacity_available=6, estimated_wait_minutes=28),
+            CentreModel(id="H_MATERNAL_1", name="Hopital Maternal 1", level="secondary", specialities="maternal", capacity_available=5, estimated_wait_minutes=35),
+            CentreModel(id="H_PEDIATRIC_1", name="Hopital Pediatric 1", level="secondary", specialities="pediatric", capacity_available=5, estimated_wait_minutes=35),
+            CentreModel(id="H_REGIONAL_1", name="Hopital Regional 1", level="tertiary", specialities="general,maternal,pediatric", capacity_available=8, estimated_wait_minutes=40),
+            CentreModel(id="H_REGIONAL_2", name="Hopital Regional 2", level="tertiary", specialities="general,maternal,pediatric", capacity_available=8, estimated_wait_minutes=38),
+        ]
+
+        refs = [
+            ("C_LOCAL_A", "H_DISTRICT_1", 15), ("C_LOCAL_A", "H_MATERNAL_1", 25), ("C_LOCAL_A", "H_REGIONAL_1", 45),
+            ("C_LOCAL_B", "H_DISTRICT_2", 14), ("C_LOCAL_B", "H_PEDIATRIC_1", 24), ("C_LOCAL_B", "H_REGIONAL_2", 44),
+            ("C_LOCAL_C", "H_DISTRICT_1", 18), ("C_LOCAL_C", "H_DISTRICT_2", 20), ("C_LOCAL_C", "H_REGIONAL_1", 40),
+            ("H_DISTRICT_1", "H_REGIONAL_1", 22), ("H_DISTRICT_1", "H_REGIONAL_2", 30),
+            ("H_DISTRICT_2", "H_REGIONAL_2", 22), ("H_DISTRICT_2", "H_REGIONAL_1", 30),
+            ("H_MATERNAL_1", "H_REGIONAL_1", 20), ("H_PEDIATRIC_1", "H_REGIONAL_2", 20),
+            ("H_REGIONAL_1", "H_REGIONAL_2", 18), ("H_REGIONAL_2", "H_REGIONAL_1", 18),
+        ]
+        from app.db.models import ReferenceModel
+        session.add_all(centres)
+        session.add_all([ReferenceModel(source_id=s, dest_id=d, travel_minutes=t) for s, d, t in refs])
+        session.commit()
+
+
 def get_initial_capacities() -> dict[str, int]:
     with get_session() as session:
         centres = session.scalars(select(CentreModel)).all()
@@ -152,6 +202,31 @@ def apply_recovery(initial_caps: dict[str, int], recovery_amount: int) -> None:
                 continue
             centre.capacity_available = min(max_capacity, centre.capacity_available + recovery_amount)
             centre.estimated_wait_minutes = max(0, centre.estimated_wait_minutes - (2 * recovery_amount))
+        session.commit()
+
+
+def apply_random_shock(
+    *,
+    source_id: str,
+    speciality: str,
+    capacity_drop: int,
+    wait_add: int,
+    rng: random.Random,
+) -> None:
+    with get_session() as session:
+        centres = session.scalars(select(CentreModel)).all()
+        candidates = []
+        for centre in centres:
+            if centre.id == source_id:
+                continue
+            specialities = [s.strip() for s in centre.specialities.split(",") if s.strip()]
+            if speciality in specialities:
+                candidates.append(centre)
+        if not candidates:
+            return
+        target = rng.choice(candidates)
+        target.capacity_available = max(0, target.capacity_available - max(capacity_drop, 0))
+        target.estimated_wait_minutes = max(0, target.estimated_wait_minutes + max(wait_add, 0))
         session.commit()
 
 
@@ -232,10 +307,13 @@ def run_simulation(args: argparse.Namespace) -> dict:
     init_db()
     if args.seed_demo:
         seed_demo_data()
+    if getattr(args, "seed_complex", False):
+        seed_complex_data()
 
     snapshot = preflight_snapshot(args.source, args.speciality)
     initial_caps = get_initial_capacities()
     recommender = Recommender()
+    rng = random.Random(args.random_seed)
 
     destination_counts: Counter[str] = Counter()
     fallback_destination_counts: Counter[str] = Counter()
@@ -286,6 +364,14 @@ def run_simulation(args: argparse.Namespace) -> dict:
 
         if args.recovery_interval > 0 and idx % args.recovery_interval == 0:
             apply_recovery(initial_caps, args.recovery_amount)
+        if args.shock_every > 0 and idx % args.shock_every == 0:
+            apply_random_shock(
+                source_id=args.source,
+                speciality=args.speciality,
+                capacity_drop=args.shock_capacity_drop,
+                wait_add=args.shock_wait_add,
+                rng=rng,
+            )
 
     success_count = args.patients - failures
     avg_travel = total_travel / success_count if success_count else 0.0
@@ -311,6 +397,12 @@ def run_simulation(args: argparse.Namespace) -> dict:
         "balance_entropy": normalized_entropy(destination_counts),
         "preflight": snapshot,
         "fallback_policy": args.fallback_policy,
+        "shock_config": {
+            "shock_every": args.shock_every,
+            "shock_wait_add": args.shock_wait_add,
+            "shock_capacity_drop": args.shock_capacity_drop,
+            "random_seed": args.random_seed,
+        },
     }
 
 
@@ -325,6 +417,11 @@ def print_report(report: dict) -> None:
     print(f"Patients failed    : {report['patients_failed']}")
     print(f"Fallbacks used     : {report['fallbacks_used']}")
     print(f"Fallback policy    : {report['fallback_policy']}")
+    print("Shock config       :")
+    print(f"  - every            : {report['shock_config']['shock_every']}")
+    print(f"  - wait_add         : {report['shock_config']['shock_wait_add']}")
+    print(f"  - capacity_drop    : {report['shock_config']['shock_capacity_drop']}")
+    print(f"  - random_seed      : {report['shock_config']['random_seed']}")
     print(f"Failure rate       : {report['failure_rate']:.2%}")
     print(f"Avg travel (min)   : {report['avg_travel_minutes']:.2f}")
     print(f"Avg wait (min)     : {report['avg_wait_minutes']:.2f}")

@@ -52,6 +52,34 @@ cd backend
 python scripts/simulate_batch.py --seed-demo --patients 80 --source C_LOCAL_A --speciality maternal --severity medium --wait-increment 5 --recovery-interval 10 --recovery-amount 1 --fallback-policy force_least_loaded --fallback-overload-penalty 30
 ```
 
+Mode reseau complexe + perturbations aleatoires:
+
+```bash
+cd backend
+python scripts/simulate_batch.py --seed-complex --patients 120 --source C_LOCAL_B --speciality pediatric --severity medium --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --fallback-policy force_least_loaded --fallback-overload-penalty 30 --shock-every 8 --shock-wait-add 12 --shock-capacity-drop 1 --random-seed 42
+```
+
+Runner multi-scenarios (demo + complexe, stable + shock):
+
+```bash
+cd backend
+python scripts/run_complex_scenarios.py --patients 120 --output docs/scenario_report.json
+```
+
+Synthese automatique (tableau classe + recommandation):
+
+```bash
+cd backend
+python scripts/summarize_scenarios.py --input docs/scenario_report.json --output docs/scenario_summary.md
+```
+
+Scenario principal de demo (recommande):
+
+```bash
+cd backend
+python scripts/run_primary_demo.py --patients 120 --output docs/primary_demo_report.json
+```
+
 Metriques affichees:
 - `avg_travel_minutes`
 - `avg_wait_minutes`
@@ -61,7 +89,27 @@ Metriques affichees:
 - `balance_entropy` (plus eleve = meilleure repartition)
 - `failure_reasons` (diagnostic des echecs)
 
-## 6) Test rapide recommandation
+## 6) Entrainement RL (PPO)
+
+```bash
+cd backend
+python scripts/train_rl.py --seed-demo --source C_LOCAL_A --speciality maternal --patients-per-episode 80 --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --overload-penalty 30 --timesteps 20000 --model-out models/ppo_referral
+```
+
+## 7) Evaluation RL vs heuristique
+
+```bash
+cd backend
+python scripts/evaluate_rl.py --seed-demo --model-path models/ppo_referral.zip --episodes 30 --source C_LOCAL_A --speciality maternal --patients-per-episode 80 --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --overload-penalty 30
+```
+
+La sortie est un JSON comparant:
+- `rl.avg_reward_per_episode`
+- `rl.avg_overloads_per_episode`
+- `heuristic.avg_reward_per_episode`
+- `heuristic.avg_overloads_per_episode`
+
+## 8) Test rapide recommandation
 
 Requete `POST /recommander`:
 
@@ -74,7 +122,7 @@ Requete `POST /recommander`:
 }
 ```
 
-## 7) Endpoints d'administration
+## 9) Endpoints d'administration
 
 ### Centres
 - `GET /centres`
@@ -118,8 +166,16 @@ Exemple `POST /references`:
 - `backend/app/services/graph_service.py`: chargement graphe depuis SQLite
 - `backend/app/services/recommender.py`: logique de recommandation
 - `backend/app/db/models.py`: schema SQLite
+- `backend/app/rl/env.py`: environnement Gymnasium pour RL
+- `backend/app/rl/heuristic_policy.py`: baseline heuristique
+- `backend/app/rl/evaluation.py`: utilitaires de comparaison RL/heuristique
 - `backend/scripts/seed_demo_data.py`: jeu de donnees initial
 - `backend/scripts/simulate_batch.py`: simulation CLI multi-patients
+- `backend/scripts/run_complex_scenarios.py`: benchmark multi-scenarios complexes
+- `backend/scripts/summarize_scenarios.py`: synthese markdown classee pour pitch
+- `backend/scripts/run_primary_demo.py`: scenario principal de demo
+- `backend/scripts/train_rl.py`: entrainement PPO
+- `backend/scripts/evaluate_rl.py`: evaluation PPO vs baseline
 - `backend/tests/conftest.py`: fixtures partages pytest
 - `backend/tests/test_admin_endpoints.py`: tests endpoints admin
 - `backend/tests/test_recommender_endpoint.py`: tests endpoint `/recommander`
@@ -128,6 +184,6 @@ Exemple `POST /references`:
 
 ## Roadmap
 
-1. Ajouter environnement Gymnasium pour comparer heuristique vs RL
-2. Ajouter premier agent RL (PPO ou DQN) + evaluation offline
-3. Ajouter module explicabilite et interface clinicien
+1. Ajouter XAI (SHAP/LIME + traces metier lisibles)
+2. Ajouter interface clinicien (dashboard parcours + explication)
+3. Ajouter pipelines d'evaluation offline sur donnees reelles
