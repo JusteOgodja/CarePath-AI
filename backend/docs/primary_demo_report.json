@@ -7,10 +7,17 @@
     "patients_failed": 0,
     "fallbacks_used": 0,
     "failure_rate": 0.0,
+    "fallback_rate": 0.0,
     "avg_travel_minutes": 30.1,
     "avg_wait_minutes": 33.525,
-    "avg_score": 9.680892857142858,
+    "avg_score": 12.585160714285717,
     "destination_counts": {
+      "H_DISTRICT_1": 34,
+      "H_REGIONAL_1": 31,
+      "H_REGIONAL_2": 29,
+      "H_MATERNAL_1": 26
+    },
+    "destination_distribution": {
       "H_DISTRICT_1": 34,
       "H_REGIONAL_1": 31,
       "H_REGIONAL_2": 29,
@@ -19,13 +26,16 @@
     "fallback_destination_counts": {},
     "failure_reasons": {},
     "concentration_hhi": 0.2523611111111111,
+    "hhi": 0.2523611111111111,
     "balance_entropy": 0.9965840321589565,
+    "entropy_norm": 0.9965840321589565,
     "preflight": {
       "centres_total": 9,
       "source_exists": true,
       "eligible_destinations": 6
     },
     "fallback_policy": "force_least_loaded",
+    "policy": "heuristic",
     "shock_config": {
       "shock_every": 0,
       "shock_wait_add": 0,

@@ -17,6 +17,7 @@ def cases() -> list[dict]:
     base = {
         "patients": 80,
         "severity": "medium",
+        "policy": "heuristic",
         "fallback_policy": "force_least_loaded",
         "fallback_overload_penalty": 30.0,
         "recovery_interval": 5,
@@ -95,6 +96,7 @@ def main() -> None:
                 "config": {
                     "source": case["source"],
                     "speciality": case["speciality"],
+                    "policy": case["policy"],
                     "seed_demo": case["seed_demo"],
                     "seed_complex": case["seed_complex"],
                     "shock_every": case["shock_every"],

@@ -9,12 +9,13 @@ if str(ROOT) not in sys.path:
 from stable_baselines3 import PPO
 
 from app.rl.env import ReferralEnv
-from seed_demo_data import seed_demo_data
+from simulate_batch import seed_complex_data, seed_demo_data
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train PPO for CarePath referral environment")
     parser.add_argument("--seed-demo", action="store_true", help="Reset and seed demo data")
+    parser.add_argument("--seed-complex", action="store_true", help="Reset and seed complex data")
     parser.add_argument("--source", type=str, default="C_LOCAL_A")
     parser.add_argument("--speciality", type=str, default="maternal")
     parser.add_argument("--patients-per-episode", type=int, default=80)
@@ -25,6 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--timesteps", type=int, default=20000)
     parser.add_argument("--learning-rate", type=float, default=3e-4)
     parser.add_argument("--model-out", type=str, default="models/ppo_referral")
+    parser.add_argument("--seed", type=int, default=42)
     return parser.parse_args()
 
 
@@ -32,6 +34,8 @@ def main() -> None:
     args = parse_args()
     if args.seed_demo:
         seed_demo_data()
+    if args.seed_complex:
+        seed_complex_data()
 
     env = ReferralEnv(
         source_id=args.source,
@@ -51,6 +55,7 @@ def main() -> None:
         n_steps=256,
         batch_size=64,
         gamma=0.99,
+        seed=args.seed,
     )
     model.learn(total_timesteps=args.timesteps)
 

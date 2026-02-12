@@ -1,8 +1,9 @@
 from sqlalchemy import ForeignKey, Integer, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
+from app.core.config import get_database_url
 
-DATABASE_URL = "sqlite:///./carepath.db"
+DATABASE_URL = get_database_url()
 
 
 class Base(DeclarativeBase):
@@ -47,7 +48,11 @@ class EpisodeModel(Base):
     reward: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
 
-engine = create_engine(DATABASE_URL, future=True)
+engine_kwargs: dict = {"future": True}
+if DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, **engine_kwargs)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
 

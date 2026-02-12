@@ -10,6 +10,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--weight-score", type=float, default=1.0)
     parser.add_argument("--weight-fallback", type=float, default=2.0)
     parser.add_argument("--weight-failure", type=float, default=5.0)
+    parser.add_argument("--weight-hhi", type=float, default=0.0)
+    parser.add_argument("--weight-entropy-gap", type=float, default=0.0)
     return parser.parse_args()
 
 
@@ -22,10 +24,21 @@ def composite_rank(
     w_score: float,
     w_fallback: float,
     w_failure: float,
+    w_hhi: float,
+    w_entropy_gap: float,
+    hhi: float,
+    entropy_norm: float,
 ) -> float:
     fallback_rate = (fallbacks / patients) if patients else 0.0
     failure_rate = (failures / patients) if patients else 0.0
-    return (w_score * avg_score) + (w_fallback * 100.0 * fallback_rate) + (w_failure * 100.0 * failure_rate)
+    entropy_gap = 1.0 - entropy_norm
+    return (
+        (w_score * avg_score)
+        + (w_fallback * 100.0 * fallback_rate)
+        + (w_failure * 100.0 * failure_rate)
+        + (w_hhi * 100.0 * hhi)
+        + (w_entropy_gap * 100.0 * entropy_gap)
+    )
 
 
 def to_row(idx: int, scenario: dict, args: argparse.Namespace, patients: int) -> dict:
@@ -38,6 +51,10 @@ def to_row(idx: int, scenario: dict, args: argparse.Namespace, patients: int) ->
         w_score=args.weight_score,
         w_fallback=args.weight_fallback,
         w_failure=args.weight_failure,
+        w_hhi=args.weight_hhi,
+        w_entropy_gap=args.weight_entropy_gap,
+        hhi=float(metrics.get("hhi", metrics["concentration_hhi"])),
+        entropy_norm=float(metrics.get("entropy_norm", metrics["balance_entropy"])),
     )
     return {
         "rank": idx,
@@ -47,8 +64,8 @@ def to_row(idx: int, scenario: dict, args: argparse.Namespace, patients: int) ->
         "avg_travel": float(metrics["avg_travel_minutes"]),
         "fallbacks": int(metrics["fallbacks_used"]),
         "failures": int(metrics["patients_failed"]),
-        "hhi": float(metrics["concentration_hhi"]),
-        "entropy": float(metrics["balance_entropy"]),
+        "hhi": float(metrics.get("hhi", metrics["concentration_hhi"])),
+        "entropy": float(metrics.get("entropy_norm", metrics["balance_entropy"])),
         "composite": rank_value,
     }
 
@@ -85,10 +102,15 @@ def render_markdown(rows: list[dict], report: dict, args: argparse.Namespace) ->
     lines.append("")
     lines.append(recommendation(rows))
     lines.append("")
+    lines.append("## Fairness")
+    lines.append("")
+    lines.append("- Higher normalized entropy indicates a more balanced referral distribution.")
+    lines.append("- Lower HHI indicates lower concentration on a small subset of centers.")
+    lines.append("")
     lines.append("## Scoring Weights")
     lines.append("")
     lines.append(
-        f"- composite = {args.weight_score}*avg_score + {args.weight_fallback}*100*fallback_rate + {args.weight_failure}*100*failure_rate"
+        f"- composite = {args.weight_score}*avg_score + {args.weight_fallback}*100*fallback_rate + {args.weight_failure}*100*failure_rate + {args.weight_hhi}*100*hhi + {args.weight_entropy_gap}*100*(1-entropy_norm)"
     )
     return "\n".join(lines)
 
@@ -118,6 +140,10 @@ def main() -> None:
             w_score=args.weight_score,
             w_fallback=args.weight_fallback,
             w_failure=args.weight_failure,
+            w_hhi=args.weight_hhi,
+            w_entropy_gap=args.weight_entropy_gap,
+            hhi=float(metrics.get("hhi", metrics["concentration_hhi"])),
+            entropy_norm=float(metrics.get("entropy_norm", metrics["balance_entropy"])),
         )
         sortable.append((score, scenario))
 

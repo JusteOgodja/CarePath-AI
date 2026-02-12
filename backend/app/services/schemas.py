@@ -16,6 +16,17 @@ class PathStep(BaseModel):
     level: str
 
 
+class ScoreBreakdown(BaseModel):
+    travel_minutes: float
+    wait_minutes: float
+    capacity_available: int
+    capacity_factor_used: float
+    severity: Literal["low", "medium", "high"]
+    severity_weight: float
+    raw_cost_travel_plus_wait: float
+    final_score: float
+
+
 class RecommandationResponse(BaseModel):
     patient_id: str
     destination_centre_id: str
@@ -25,6 +36,8 @@ class RecommandationResponse(BaseModel):
     estimated_wait_minutes: float
     score: float
     explanation: str
+    rationale: str
+    score_breakdown: ScoreBreakdown
 
 
 class CentreCreate(BaseModel):

@@ -1,4 +1,5 @@
 import sys
+import os
 from pathlib import Path
 
 import pytest
@@ -7,6 +8,8 @@ from fastapi.testclient import TestClient
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+os.environ.setdefault("DATABASE_URL", "sqlite:///./test_carepath.db")
 
 from app.db.models import CentreModel, ReferenceModel, get_session, init_db
 

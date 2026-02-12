@@ -42,8 +42,9 @@ def test_candidate_score_formula_regression() -> None:
         travel_minutes=30.0,
         wait_minutes=20.0,
         capacity=5,
+        severity="medium",
     )
-    assert candidate.score == 10.0
+    assert candidate.score == 13.0
 
 
 def test_recommender_prefers_higher_capacity_when_costs_close(client: TestClient) -> None:

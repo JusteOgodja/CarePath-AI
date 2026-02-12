@@ -3,20 +3,21 @@ import json
 import sys
 from pathlib import Path
 
+from stable_baselines3 import PPO
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from stable_baselines3 import PPO
-
 from app.rl.env import ReferralEnv
-from app.rl.evaluation import evaluate_heuristic
-from seed_demo_data import seed_demo_data
+from app.rl.evaluation import evaluate_heuristic, evaluate_ppo, evaluate_random
+from simulate_batch import seed_complex_data, seed_demo_data
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Evaluate trained PPO vs heuristic baseline")
+    parser = argparse.ArgumentParser(description="Evaluate PPO vs heuristic vs random baseline")
     parser.add_argument("--seed-demo", action="store_true", help="Reset and seed demo data")
+    parser.add_argument("--seed-complex", action="store_true", help="Reset and seed complex data")
     parser.add_argument("--model-path", type=str, default="models/ppo_referral.zip")
     parser.add_argument("--episodes", type=int, default=30)
     parser.add_argument("--source", type=str, default="C_LOCAL_A")
@@ -26,33 +27,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--recovery-interval", type=int, default=5)
     parser.add_argument("--recovery-amount", type=int, default=2)
     parser.add_argument("--overload-penalty", type=float, default=30.0)
+    parser.add_argument("--seed", type=int, default=42, help="Base seed for deterministic evaluation")
     return parser.parse_args()
-
-
-def evaluate_rl(model: PPO, env: ReferralEnv, episodes: int) -> dict:
-    total_reward = 0.0
-    total_overloads = 0
-    destination_counts: dict[str, int] = {}
-
-    for _ in range(episodes):
-        obs, _ = env.reset()
-        done = False
-        while not done:
-            action, _ = model.predict(obs, deterministic=True)
-            obs, reward, terminated, truncated, info = env.step(int(action))
-            total_reward += float(reward)
-            if info["overload"]:
-                total_overloads += 1
-            dest = info["destination_id"]
-            destination_counts[dest] = destination_counts.get(dest, 0) + 1
-            done = terminated or truncated
-
-    denom = max(episodes, 1)
-    return {
-        "avg_reward_per_episode": total_reward / denom,
-        "avg_overloads_per_episode": total_overloads / denom,
-        "destinations": destination_counts,
-    }
 
 
 def build_env(args: argparse.Namespace) -> ReferralEnv:
@@ -71,17 +47,27 @@ def main() -> None:
     args = parse_args()
     if args.seed_demo:
         seed_demo_data()
+    if args.seed_complex:
+        seed_complex_data()
 
     model_path = Path(args.model_path)
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}")
 
-    env_for_rl = build_env(args)
-    model = PPO.load(str(model_path), env=env_for_rl)
-    rl_metrics = evaluate_rl(model, env_for_rl, args.episodes)
+    env_for_ppo = build_env(args)
+    model = PPO.load(str(model_path), env=env_for_ppo)
+    ppo_metrics = evaluate_ppo(model, env_for_ppo, args.episodes, seed_base=args.seed)
 
     env_for_heuristic = build_env(args)
-    heuristic_metrics = evaluate_heuristic(env_for_heuristic, args.episodes, args.overload_penalty)
+    heuristic_metrics = evaluate_heuristic(
+        env_for_heuristic,
+        args.episodes,
+        args.overload_penalty,
+        seed_base=args.seed,
+    )
+
+    env_for_random = build_env(args)
+    random_metrics = evaluate_random(env_for_random, args.episodes, seed_base=args.seed)
 
     report = {
         "episodes": args.episodes,
@@ -93,12 +79,15 @@ def main() -> None:
             "recovery_interval": args.recovery_interval,
             "recovery_amount": args.recovery_amount,
             "overload_penalty": args.overload_penalty,
+            "seed": args.seed,
         },
-        "rl": rl_metrics,
+        "ppo": ppo_metrics,
         "heuristic": heuristic_metrics,
+        "random": random_metrics,
     }
     print(json.dumps(report, indent=2))
 
 
 if __name__ == "__main__":
     main()
+

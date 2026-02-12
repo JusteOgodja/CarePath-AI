@@ -19,6 +19,7 @@ def build_primary_namespace(patients: int) -> Namespace:
         source="C_LOCAL_A",
         speciality="maternal",
         severity="medium",
+        policy="heuristic",
         wait_increment=3,
         recovery_interval=5,
         recovery_amount=2,

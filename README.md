@@ -1,9 +1,13 @@
 # CarePath AI
 
-Prototype pour optimiser les parcours de reference patient via un graphe de soins,
-une API FastAPI, puis extension RL + explicabilite.
+Prototype local (100% gratuit) pour l'optimisation des parcours de reference patient:
+- API FastAPI (recommandation + admin reseau)
+- Graphe de soins (NetworkX)
+- Simulation de scenarios + KPI equite (entropy_norm, HHI)
+- Comparaison PPO vs Heuristic vs Random
+- Frontend Streamlit de demo live
 
-## 1) Installation rapide
+## Installation
 
 ```bash
 cd backend
@@ -12,178 +16,135 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## 2) Initialiser la base et charger les donnees de demo
+Config locale (`.env.example`):
+- `DATABASE_URL` (defaut: `sqlite:///./carepath.db`)
+
+## API Backend
 
 ```bash
 cd backend
 python scripts/init_db.py
 python scripts/seed_demo_data.py
-```
-
-## 3) Lancer l'API
-
-```bash
-cd backend
 uvicorn app.main:app --reload
 ```
 
-API docs: `http://127.0.0.1:8000/docs`
+Docs API: `http://127.0.0.1:8000/docs`
 
-## 4) Tests automatiques
+### Endpoint metier
+- `POST /recommander`
+  - utilise `severity` dans le score
+  - renvoie `rationale` + `score_breakdown`
+
+## Streamlit Demo UI
+
+Depuis la racine du projet:
+
+```bash
+streamlit run frontend/streamlit_app.py
+```
+
+Fonctions:
+- charge centres/references via API
+- visualise graphe + chemin recommande
+- affiche destination, score, score_breakdown, rationale
+- bouton pour lancer le scenario principal et afficher KPI
+
+## One-command local demo runner
+
+Depuis la racine du projet:
+
+```bash
+python scripts/run_local_demo.py
+```
+
+Ce script:
+1. reset DB SQLite locale (sauf `--skip-reset`)
+2. init DB + seed reseau complexe
+3. genere rapports (`primary_demo_report`, `scenario_report`, `scenario_summary`)
+4. lance FastAPI et Streamlit
+
+Options:
+- `--api-port 8000`
+- `--ui-port 8501`
+- `--skip-reset`
+
+## Simulation et scenarios
+
+### Batch simulation (heuristic ou random)
 
 ```bash
 cd backend
-pytest -q
+python scripts/simulate_batch.py --seed-complex --patients 120 --source C_LOCAL_A --speciality maternal --severity medium --policy heuristic --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --fallback-policy force_least_loaded --fallback-overload-penalty 30
 ```
 
-## 5) Simulation batch (pre-RL)
-
-Simulation multi-patients pour mesurer delai, saturation et equilibre des orientations.
+Mode random:
 
 ```bash
-cd backend
-python scripts/simulate_batch.py --seed-demo --patients 80 --source C_LOCAL_A --speciality maternal --severity medium --wait-increment 5 --recovery-interval 10 --recovery-amount 1
+python scripts/simulate_batch.py --seed-complex --patients 120 --source C_LOCAL_A --speciality maternal --severity medium --policy random --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --fallback-policy none
 ```
 
-Mode triage de secours (evite les echecs durs en saturation):
+KPI inclus:
+- `failure_rate`, `fallback_rate`
+- `avg_travel_minutes`, `avg_wait_minutes`, `avg_score`
+- `entropy_norm` (plus haut = plus equitable)
+- `hhi` (plus bas = moins concentre)
 
-```bash
-cd backend
-python scripts/simulate_batch.py --seed-demo --patients 80 --source C_LOCAL_A --speciality maternal --severity medium --wait-increment 5 --recovery-interval 10 --recovery-amount 1 --fallback-policy force_least_loaded --fallback-overload-penalty 30
-```
-
-Mode reseau complexe + perturbations aleatoires:
-
-```bash
-cd backend
-python scripts/simulate_batch.py --seed-complex --patients 120 --source C_LOCAL_B --speciality pediatric --severity medium --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --fallback-policy force_least_loaded --fallback-overload-penalty 30 --shock-every 8 --shock-wait-add 12 --shock-capacity-drop 1 --random-seed 42
-```
-
-Runner multi-scenarios (demo + complexe, stable + shock):
+### Runner multi-scenarios
 
 ```bash
 cd backend
 python scripts/run_complex_scenarios.py --patients 120 --output docs/scenario_report.json
+python scripts/summarize_scenarios.py --input docs/scenario_report.json --output docs/scenario_summary.md --weight-hhi 0.5 --weight-entropy-gap 0.5
 ```
 
-Synthese automatique (tableau classe + recommandation):
+Le resume Markdown contient une section Fairness et un ranking composite configurable.
+
+## RL: Train + Evaluate (PPO vs Heuristic vs Random)
+
+### Train
 
 ```bash
 cd backend
-python scripts/summarize_scenarios.py --input docs/scenario_report.json --output docs/scenario_summary.md
+python scripts/train_rl.py --seed-complex --source C_LOCAL_A --speciality maternal --patients-per-episode 80 --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --overload-penalty 30 --timesteps 20000 --learning-rate 3e-4 --seed 42 --model-out models/ppo_referral
 ```
 
-Scenario principal de demo (recommande):
+### Evaluate
+
+```bash
+cd backend
+python scripts/evaluate_rl.py --seed-complex --model-path models/ppo_referral.zip --episodes 30 --source C_LOCAL_A --speciality maternal --patients-per-episode 80 --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --overload-penalty 30 --seed 42
+```
+
+Sortie JSON harmonisee pour 3 methodes:
+- `ppo`
+- `heuristic`
+- `random`
+
+Chaque bloc contient:
+- `avg_reward_per_episode`
+- `avg_overloads_per_episode`
+- `avg_travel`, `avg_wait`
+- `failure_rate`, `fallback_rate`
+- `entropy_norm`, `hhi`
+- `destination_distribution`
+
+## Scenario principal de demo
 
 ```bash
 cd backend
 python scripts/run_primary_demo.py --patients 120 --output docs/primary_demo_report.json
 ```
 
-Metriques affichees:
-- `avg_travel_minutes`
-- `avg_wait_minutes`
-- `failure_rate`
-- `fallbacks_used`
-- `concentration_hhi` (plus faible = moins de concentration)
-- `balance_entropy` (plus eleve = meilleure repartition)
-- `failure_reasons` (diagnostic des echecs)
-
-## 6) Entrainement RL (PPO)
+## Tests
 
 ```bash
 cd backend
-python scripts/train_rl.py --seed-demo --source C_LOCAL_A --speciality maternal --patients-per-episode 80 --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --overload-penalty 30 --timesteps 20000 --model-out models/ppo_referral
+pytest -q
 ```
 
-## 7) Evaluation RL vs heuristique
-
-```bash
-cd backend
-python scripts/evaluate_rl.py --seed-demo --model-path models/ppo_referral.zip --episodes 30 --source C_LOCAL_A --speciality maternal --patients-per-episode 80 --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --overload-penalty 30
-```
-
-La sortie est un JSON comparant:
-- `rl.avg_reward_per_episode`
-- `rl.avg_overloads_per_episode`
-- `heuristic.avg_reward_per_episode`
-- `heuristic.avg_overloads_per_episode`
-
-## 8) Test rapide recommandation
-
-Requete `POST /recommander`:
-
-```json
-{
-  "patient_id": "P001",
-  "current_centre_id": "C_LOCAL_A",
-  "needed_speciality": "maternal",
-  "severity": "medium"
-}
-```
-
-## 9) Endpoints d'administration
-
-### Centres
-- `GET /centres`
-- `POST /centres`
-- `PUT /centres/{centre_id}`
-- `DELETE /centres/{centre_id}`
-
-Exemple `POST /centres`:
-
-```json
-{
-  "id": "H_DISTRICT_2",
-  "name": "Hopital District 2",
-  "level": "secondary",
-  "specialities": ["general", "maternal"],
-  "capacity_available": 5,
-  "estimated_wait_minutes": 25
-}
-```
-
-### References
-- `GET /references`
-- `POST /references`
-- `PUT /references/{reference_id}`
-- `DELETE /references/{reference_id}`
-
-Exemple `POST /references`:
-
-```json
-{
-  "source_id": "C_LOCAL_A",
-  "dest_id": "H_DISTRICT_2",
-  "travel_minutes": 18
-}
-```
-
-## Structure
-
-- `backend/app/main.py`: entree FastAPI
-- `backend/app/api/routes.py`: endpoints metier + administration
-- `backend/app/services/graph_service.py`: chargement graphe depuis SQLite
-- `backend/app/services/recommender.py`: logique de recommandation
-- `backend/app/db/models.py`: schema SQLite
-- `backend/app/rl/env.py`: environnement Gymnasium pour RL
-- `backend/app/rl/heuristic_policy.py`: baseline heuristique
-- `backend/app/rl/evaluation.py`: utilitaires de comparaison RL/heuristique
-- `backend/scripts/seed_demo_data.py`: jeu de donnees initial
-- `backend/scripts/simulate_batch.py`: simulation CLI multi-patients
-- `backend/scripts/run_complex_scenarios.py`: benchmark multi-scenarios complexes
-- `backend/scripts/summarize_scenarios.py`: synthese markdown classee pour pitch
-- `backend/scripts/run_primary_demo.py`: scenario principal de demo
-- `backend/scripts/train_rl.py`: entrainement PPO
-- `backend/scripts/evaluate_rl.py`: evaluation PPO vs baseline
-- `backend/tests/conftest.py`: fixtures partages pytest
-- `backend/tests/test_admin_endpoints.py`: tests endpoints admin
-- `backend/tests/test_recommender_endpoint.py`: tests endpoint `/recommander`
-- `backend/tests/test_scoring_regression.py`: non-regression logique de score
-- `backend/tests/test_equity_saturation.py`: scenarios d'equite/saturation
-
-## Roadmap
-
-1. Ajouter XAI (SHAP/LIME + traces metier lisibles)
-2. Ajouter interface clinicien (dashboard parcours + explication)
-3. Ajouter pipelines d'evaluation offline sur donnees reelles
+Couverture inclut:
+- CRUD admin
+- `/recommander` + payload explicable
+- regression scoring + effet severity
+- random baseline valide
+- equite/saturation

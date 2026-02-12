@@ -75,6 +75,86 @@ def test_recommander_returns_best_destination(client: TestClient) -> None:
     assert body["path"][0]["centre_id"] == "C_LOCAL_A"
     assert body["path"][-1]["centre_id"] == "H_REGIONAL_1"
     assert "selected because it matches speciality" in body["explanation"]
+    assert "severity" in body["explanation"]
+    assert "rationale" in body
+    assert "score_breakdown" in body
+    assert body["score_breakdown"]["severity"] == "medium"
+    assert body["score_breakdown"]["final_score"] == body["score"]
+
+
+def test_recommander_score_breakdown_matches_formula(client: TestClient) -> None:
+    _create_centre(
+        client,
+        centre_id="C_LOCAL_A",
+        specialities=["general", "maternal"],
+        capacity_available=3,
+        estimated_wait_minutes=20,
+    )
+    _create_centre(
+        client,
+        centre_id="H_REGIONAL_1",
+        specialities=["maternal"],
+        capacity_available=5,
+        estimated_wait_minutes=30,
+    )
+    _create_reference(client, "C_LOCAL_A", "H_REGIONAL_1", 20)
+
+    response = client.post(
+        "/recommander",
+        json={
+            "patient_id": "P_BREAKDOWN",
+            "current_centre_id": "C_LOCAL_A",
+            "needed_speciality": "maternal",
+            "severity": "high",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    breakdown = body["score_breakdown"]
+
+    raw = breakdown["travel_minutes"] + breakdown["wait_minutes"]
+    expected = breakdown["severity_weight"] * raw / breakdown["capacity_factor_used"]
+    assert abs(expected - breakdown["final_score"]) < 1e-9
+
+
+def test_recommander_severity_increases_score_for_same_destination(client: TestClient) -> None:
+    _create_centre(
+        client,
+        centre_id="C_LOCAL_A",
+        specialities=["general", "maternal"],
+        capacity_available=3,
+        estimated_wait_minutes=10,
+    )
+    _create_centre(
+        client,
+        centre_id="H_ONLY",
+        specialities=["maternal"],
+        capacity_available=4,
+        estimated_wait_minutes=20,
+    )
+    _create_reference(client, "C_LOCAL_A", "H_ONLY", 20)
+
+    low = client.post(
+        "/recommander",
+        json={
+            "patient_id": "P_LOW",
+            "current_centre_id": "C_LOCAL_A",
+            "needed_speciality": "maternal",
+            "severity": "low",
+        },
+    )
+    high = client.post(
+        "/recommander",
+        json={
+            "patient_id": "P_HIGH",
+            "current_centre_id": "C_LOCAL_A",
+            "needed_speciality": "maternal",
+            "severity": "high",
+        },
+    )
+    assert low.status_code == 200
+    assert high.status_code == 200
+    assert high.json()["score"] > low.json()["score"]
 
 
 def test_recommander_empty_network_returns_400(client: TestClient) -> None:

@@ -6,6 +6,7 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
+import networkx as nx
 from sqlalchemy import select
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,7 +15,7 @@ if str(ROOT) not in sys.path:
 
 from app.db.models import CentreModel, get_session, init_db
 from app.services.graph_service import GraphService
-from app.services.recommender import Recommender
+from app.services.recommender import Recommender, compute_final_score
 from app.services.schemas import RecommandationRequest
 
 
@@ -27,12 +28,27 @@ class FallbackDecision:
     reason: str
 
 
+@dataclass
+class PolicyDecision:
+    destination_id: str
+    travel_minutes: float
+    wait_minutes: float
+    score: float
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Batch simulation for CarePath referral strategy")
     parser.add_argument("--patients", type=int, default=50, help="Number of simulated patients")
     parser.add_argument("--source", type=str, default="C_LOCAL_A", help="Source centre ID")
     parser.add_argument("--speciality", type=str, default="maternal", help="Requested speciality")
     parser.add_argument("--severity", type=str, default="medium", help="Patient severity (low|medium|high)")
+    parser.add_argument(
+        "--policy",
+        type=str,
+        choices=["heuristic", "random"],
+        default="heuristic",
+        help="Primary routing policy before fallback",
+    )
     parser.add_argument(
         "--wait-increment",
         type=int,
@@ -261,6 +277,7 @@ def fallback_recommendation(
     *,
     source_id: str,
     speciality: str,
+    severity: str,
     overload_penalty: float,
 ) -> FallbackDecision | None:
     graph_service = GraphService()
@@ -284,7 +301,12 @@ def fallback_recommendation(
 
         wait_minutes = float(attrs["estimated_wait_minutes"])
         capacity = int(attrs["capacity_available"])
-        score = (travel_minutes + wait_minutes) / max(capacity, 1)
+        score = compute_final_score(
+            travel_minutes=travel_minutes,
+            wait_minutes=wait_minutes,
+            capacity=capacity,
+            severity=severity,
+        )
         if capacity <= 0:
             score += overload_penalty
 
@@ -301,6 +323,58 @@ def fallback_recommendation(
     if not candidates:
         return None
     return min(candidates, key=lambda item: item.score)
+
+
+def _build_reachable_candidates(
+    *,
+    source_id: str,
+    speciality: str,
+    severity: str,
+) -> list[PolicyDecision]:
+    graph_service = GraphService()
+    graph_service.reload()
+    candidates: list[PolicyDecision] = []
+    for node_id in graph_service.candidate_destinations(speciality):
+        if node_id == source_id:
+            continue
+        try:
+            _, travel = graph_service.shortest_path(source_id, node_id)
+        except (nx.NetworkXNoPath, nx.NodeNotFound):
+            continue
+        attrs = graph_service.node(node_id)
+        wait = float(attrs["estimated_wait_minutes"])
+        capacity = int(attrs["capacity_available"])
+        candidates.append(
+            PolicyDecision(
+                destination_id=node_id,
+                travel_minutes=float(travel),
+                wait_minutes=wait,
+                score=compute_final_score(
+                    travel_minutes=float(travel),
+                    wait_minutes=wait,
+                    capacity=capacity,
+                    severity=severity,
+                ),
+            )
+        )
+    return candidates
+
+
+def random_recommendation(
+    *,
+    source_id: str,
+    speciality: str,
+    severity: str,
+    rng: random.Random,
+) -> PolicyDecision | None:
+    candidates = _build_reachable_candidates(
+        source_id=source_id,
+        speciality=speciality,
+        severity=severity,
+    )
+    if not candidates:
+        return None
+    return rng.choice(candidates)
 
 
 def run_simulation(args: argparse.Namespace) -> dict:
@@ -333,12 +407,29 @@ def run_simulation(args: argparse.Namespace) -> dict:
         )
 
         try:
-            recommendation = recommender.recommend(payload)
+            if args.policy == "random":
+                random_choice = random_recommendation(
+                    source_id=args.source,
+                    speciality=args.speciality,
+                    severity=args.severity,
+                    rng=rng,
+                )
+                if random_choice is None:
+                    raise ValueError("No reachable destination found from current centre")
+                destination_counts[random_choice.destination_id] += 1
+                total_travel += random_choice.travel_minutes
+                total_wait += random_choice.wait_minutes
+                total_score += random_choice.score
+                apply_referral_impact(random_choice.destination_id, args.wait_increment)
+                recommendation = None
+            else:
+                recommendation = recommender.recommend(payload)
         except ValueError as exc:
             if args.fallback_policy == "force_least_loaded":
                 fallback = fallback_recommendation(
                     source_id=args.source,
                     speciality=args.speciality,
+                    severity=args.severity,
                     overload_penalty=args.fallback_overload_penalty,
                 )
                 if fallback is not None:
@@ -356,11 +447,14 @@ def run_simulation(args: argparse.Namespace) -> dict:
                 failures += 1
                 failure_reasons[str(exc)] += 1
         else:
-            destination_counts[recommendation.destination_centre_id] += 1
-            total_travel += recommendation.estimated_travel_minutes
-            total_wait += recommendation.estimated_wait_minutes
-            total_score += recommendation.score
-            apply_referral_impact(recommendation.destination_centre_id, args.wait_increment)
+            if recommendation is None:
+                pass
+            else:
+                destination_counts[recommendation.destination_centre_id] += 1
+                total_travel += recommendation.estimated_travel_minutes
+                total_wait += recommendation.estimated_wait_minutes
+                total_score += recommendation.score
+                apply_referral_impact(recommendation.destination_centre_id, args.wait_increment)
 
         if args.recovery_interval > 0 and idx % args.recovery_interval == 0:
             apply_recovery(initial_caps, args.recovery_amount)
@@ -380,6 +474,8 @@ def run_simulation(args: argparse.Namespace) -> dict:
 
     proportions = [count / success_count for count in destination_counts.values()] if success_count else []
     concentration_hhi = sum(p * p for p in proportions)
+    fallback_rate = (fallbacks_used / args.patients) if args.patients else 0.0
+    entropy_norm = normalized_entropy(destination_counts)
 
     return {
         "patients_total": args.patients,
@@ -387,16 +483,21 @@ def run_simulation(args: argparse.Namespace) -> dict:
         "patients_failed": failures,
         "fallbacks_used": fallbacks_used,
         "failure_rate": failures / args.patients if args.patients else 0.0,
+        "fallback_rate": fallback_rate,
         "avg_travel_minutes": avg_travel,
         "avg_wait_minutes": avg_wait,
         "avg_score": avg_score,
         "destination_counts": dict(destination_counts),
+        "destination_distribution": dict(destination_counts),
         "fallback_destination_counts": dict(fallback_destination_counts),
         "failure_reasons": dict(failure_reasons),
         "concentration_hhi": concentration_hhi,
-        "balance_entropy": normalized_entropy(destination_counts),
+        "hhi": concentration_hhi,
+        "balance_entropy": entropy_norm,
+        "entropy_norm": entropy_norm,
         "preflight": snapshot,
         "fallback_policy": args.fallback_policy,
+        "policy": args.policy,
         "shock_config": {
             "shock_every": args.shock_every,
             "shock_wait_add": args.shock_wait_add,
@@ -416,6 +517,7 @@ def print_report(report: dict) -> None:
     print(f"Patients success   : {report['patients_success']}")
     print(f"Patients failed    : {report['patients_failed']}")
     print(f"Fallbacks used     : {report['fallbacks_used']}")
+    print(f"Policy             : {report['policy']}")
     print(f"Fallback policy    : {report['fallback_policy']}")
     print("Shock config       :")
     print(f"  - every            : {report['shock_config']['shock_every']}")
@@ -423,6 +525,7 @@ def print_report(report: dict) -> None:
     print(f"  - capacity_drop    : {report['shock_config']['shock_capacity_drop']}")
     print(f"  - random_seed      : {report['shock_config']['random_seed']}")
     print(f"Failure rate       : {report['failure_rate']:.2%}")
+    print(f"Fallback rate      : {report['fallback_rate']:.2%}")
     print(f"Avg travel (min)   : {report['avg_travel_minutes']:.2f}")
     print(f"Avg wait (min)     : {report['avg_wait_minutes']:.2f}")
     print(f"Avg score          : {report['avg_score']:.2f}")
