@@ -45,16 +45,24 @@ class CentreCreate(BaseModel):
     name: str = Field(..., examples=["Hopital District 2"])
     level: str = Field(..., examples=["secondary"])
     specialities: list[str] = Field(..., examples=[["general", "maternal"]])
+    capacity_max: int = Field(10, ge=0, examples=[10])
     capacity_available: int = Field(..., ge=0, examples=[4])
     estimated_wait_minutes: int = Field(..., ge=0, examples=[30])
+    lat: float | None = Field(None, ge=-90, le=90, examples=[-1.286389])
+    lon: float | None = Field(None, ge=-180, le=180, examples=[36.817223])
+    catchment_population: int = Field(0, ge=0, examples=[12000])
 
 
 class CentreUpdate(BaseModel):
     name: str = Field(..., examples=["Hopital District 2"])
     level: str = Field(..., examples=["secondary"])
     specialities: list[str] = Field(..., examples=[["general", "maternal"]])
+    capacity_max: int = Field(10, ge=0, examples=[10])
     capacity_available: int = Field(..., ge=0, examples=[4])
     estimated_wait_minutes: int = Field(..., ge=0, examples=[30])
+    lat: float | None = Field(None, ge=-90, le=90, examples=[-1.286389])
+    lon: float | None = Field(None, ge=-180, le=180, examples=[36.817223])
+    catchment_population: int = Field(0, ge=0, examples=[12000])
 
 
 class CentreResponse(BaseModel):
@@ -62,8 +70,12 @@ class CentreResponse(BaseModel):
     name: str
     level: str
     specialities: list[str]
+    capacity_max: int
     capacity_available: int
     estimated_wait_minutes: int
+    lat: float | None = None
+    lon: float | None = None
+    catchment_population: int = 0
 
 
 class ReferenceCreate(BaseModel):

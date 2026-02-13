@@ -1,16 +1,17 @@
 import { motion } from "framer-motion";
-import { Circle, ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
+import type { PathStep } from "@/lib/types";
 
-export function PathTimeline({ path }: { path: string[] }) {
+export function PathTimeline({ path }: { path: PathStep[] }) {
   return (
     <div className="premium-card p-6">
       <p className="stat-label mb-4 flex items-center gap-2">
         <MapPin className="h-3.5 w-3.5 text-primary" /> Chemin de référence
       </p>
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        {path.map((node, i) => (
+        {path.map((step, i) => (
           <motion.div
-            key={i}
+            key={`${step.centre_id}-${i}`}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.1, type: "spring", stiffness: 300 }}
@@ -18,7 +19,7 @@ export function PathTimeline({ path }: { path: string[] }) {
           >
             <div className="flex items-center gap-2.5 rounded-xl bg-primary/8 border border-primary/15 px-4 py-2.5">
               <div className="h-2.5 w-2.5 rounded-full bg-primary shadow-sm" />
-              <span className="text-sm font-semibold">{node}</span>
+              <span className="text-sm font-semibold">{step.centre_name || step.centre_id}</span>
             </div>
             {i < path.length - 1 && (
               <div className="flex items-center gap-0.5">

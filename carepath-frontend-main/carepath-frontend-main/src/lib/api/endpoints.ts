@@ -56,7 +56,7 @@ export const updateReference = (ref: Reference) =>
     body: JSON.stringify(ref),
   });
 
-export const deleteReference = (id: string) =>
+export const deleteReference = (id: number) =>
   apiFetch<void>(`/references/${id}`, { method: "DELETE" });
 
 // Indicators

@@ -61,8 +61,12 @@ def list_centres() -> list[CentreResponse]:
             name=row.name,
             level=row.level,
             specialities=_split_specialities(row.specialities),
+            capacity_max=row.capacity_max,
             capacity_available=row.capacity_available,
             estimated_wait_minutes=row.estimated_wait_minutes,
+            lat=row.lat,
+            lon=row.lon,
+            catchment_population=int(row.catchment_population or 0),
         )
         for row in rows
     ]
@@ -85,8 +89,12 @@ def create_centre(payload: CentreCreate) -> CentreResponse:
             name=payload.name,
             level=payload.level,
             specialities=specialities,
+            capacity_max=payload.capacity_max,
             capacity_available=payload.capacity_available,
             estimated_wait_minutes=payload.estimated_wait_minutes,
+            lat=payload.lat,
+            lon=payload.lon,
+            catchment_population=payload.catchment_population,
         )
         session.add(centre)
         session.commit()
@@ -96,8 +104,12 @@ def create_centre(payload: CentreCreate) -> CentreResponse:
         name=payload.name,
         level=payload.level,
         specialities=_split_specialities(specialities),
+        capacity_max=payload.capacity_max,
         capacity_available=payload.capacity_available,
         estimated_wait_minutes=payload.estimated_wait_minutes,
+        lat=payload.lat,
+        lon=payload.lon,
+        catchment_population=payload.catchment_population,
     )
 
 
@@ -116,8 +128,12 @@ def update_centre(centre_id: str, payload: CentreUpdate) -> CentreResponse:
         centre.name = payload.name
         centre.level = payload.level
         centre.specialities = specialities
+        centre.capacity_max = payload.capacity_max
         centre.capacity_available = payload.capacity_available
         centre.estimated_wait_minutes = payload.estimated_wait_minutes
+        centre.lat = payload.lat
+        centre.lon = payload.lon
+        centre.catchment_population = payload.catchment_population
         session.commit()
 
         return CentreResponse(
@@ -125,8 +141,12 @@ def update_centre(centre_id: str, payload: CentreUpdate) -> CentreResponse:
             name=centre.name,
             level=centre.level,
             specialities=_split_specialities(centre.specialities),
+            capacity_max=centre.capacity_max,
             capacity_available=centre.capacity_available,
             estimated_wait_minutes=centre.estimated_wait_minutes,
+            lat=centre.lat,
+            lon=centre.lon,
+            catchment_population=int(centre.catchment_population or 0),
         )
 
 
