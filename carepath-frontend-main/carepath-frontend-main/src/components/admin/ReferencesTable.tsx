@@ -23,7 +23,7 @@ export function ReferencesTable() {
   const [search, setSearch] = React.useState("");
   const [modalOpen, setModalOpen] = React.useState(false);
   const [editRef, setEditRef] = React.useState<Reference | null>(null);
-  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+  const [deleteId, setDeleteId] = React.useState<number | null>(null);
 
   const { data: refs = [], isLoading, error, refetch } = useQuery({
     queryKey: ["references"],
@@ -87,7 +87,7 @@ export function ReferencesTable() {
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditRef(r); setModalOpen(true); }}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteId(r.id || "")}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteId(r.id ?? null)}>
                         <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
                     </div>

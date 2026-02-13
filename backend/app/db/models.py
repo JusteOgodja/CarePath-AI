@@ -1,7 +1,10 @@
-from sqlalchemy import ForeignKey, Integer, String, Text, UniqueConstraint, create_engine, text
+from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from app.core.config import get_database_url
+from app.db.migrations import run_migrations
 
 DATABASE_URL = get_database_url()
 
@@ -38,6 +41,27 @@ class ReferenceModel(Base):
     source_id: Mapped[str] = mapped_column(ForeignKey("centres.id"), nullable=False)
     dest_id: Mapped[str] = mapped_column(ForeignKey("centres.id"), nullable=False)
     travel_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class ReferralRequestModel(Base):
+    __tablename__ = "referral_requests"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    patient_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    source_id: Mapped[str] = mapped_column(ForeignKey("centres.id"), nullable=False)
+    needed_speciality: Mapped[str] = mapped_column(String(32), nullable=False)
+    severity: Mapped[str] = mapped_column(String(16), nullable=False)
+    proposed_dest_id: Mapped[str | None] = mapped_column(ForeignKey("centres.id"), nullable=True)
+    accepted_dest_id: Mapped[str | None] = mapped_column(ForeignKey("centres.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    feedback_diagnosis: Mapped[str | None] = mapped_column(Text, nullable=True)
+    feedback_treatment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    feedback_followup: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class PatientModel(Base):
@@ -88,38 +112,9 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, futu
 
 
 def init_db() -> None:
-    Base.metadata.create_all(engine)
-    _ensure_sqlite_schema_updates()
-
-
-def _ensure_sqlite_schema_updates() -> None:
-    if not DATABASE_URL.startswith("sqlite"):
-        return
-
-    required_columns = {
-        "lat": "REAL",
-        "lon": "REAL",
-        "osm_type": "TEXT",
-        "osm_id": "TEXT",
-        "raw_tags_json": "TEXT",
-        "capacity_max": "INTEGER NOT NULL DEFAULT 10",
-        "catchment_population": "INTEGER DEFAULT 0",
-    }
-
-    with engine.begin() as conn:
-        rows = conn.execute(text("PRAGMA table_info(centres)")).fetchall()
-        existing = {row[1] for row in rows}
-
-        for col, sql_type in required_columns.items():
-            if col not in existing:
-                conn.execute(text(f"ALTER TABLE centres ADD COLUMN {col} {sql_type}"))
-
-        conn.execute(
-            text(
-                "CREATE UNIQUE INDEX IF NOT EXISTS idx_centres_osm_identity "
-                "ON centres(osm_type, osm_id)"
-            )
-        )
+    if not run_migrations():
+        # Fallback for environments where Alembic is not installed yet.
+        Base.metadata.create_all(engine)
 
 
 def get_session() -> Session:

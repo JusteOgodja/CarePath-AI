@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Clock, MapPin, Star, TrendingUp, Copy, Check, Timer } from "lucide-react";
+import { MapPin, Star, TrendingUp, Copy, Check, Timer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { RecommandationResponse } from "@/lib/types";
@@ -40,7 +40,7 @@ export function RecommendationResult({ result }: Props) {
         <motion.div variants={item} className="kpi-card">
           <p className="stat-label">Destination</p>
           <p className="text-xl font-bold mt-2">{result.destination_name}</p>
-          <p className="text-xs text-muted-foreground font-mono mt-1">{result.destination_id}</p>
+          <p className="text-xs text-muted-foreground font-mono mt-1">{result.destination_centre_id}</p>
         </motion.div>
 
         <motion.div variants={item} className="kpi-card">

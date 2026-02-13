@@ -1,14 +1,85 @@
 # CarePath AI
 
-Prototype local (100% gratuit) pour l'optimisation des parcours de reference patient:
-- API FastAPI (recommandation + admin reseau)
-- Graphe de soins (NetworkX)
-- Simulation de scenarios + KPI equite (entropy_norm, HHI)
-- Comparaison PPO vs Heuristic vs Random
-- Frontend Streamlit de demo live
+CarePath AI is a platform for optimizing patient referral pathways in healthcare networks.
+It combines:
+- a FastAPI backend for business orchestration,
+- a recommendation engine (heuristic + RL/PPO),
+- public data import and quality tooling,
+- a React/Vite frontend for operations,
+- simulation and policy benchmark scripts.
 
-## Installation
+## 1. Project goals
 
+### Main goal
+Improve quality, speed, and fairness of patient transfers between health facilities.
+
+### Technical goals
+- Recommend the best destination according to specialty, severity, capacity, and travel time.
+- Compare routing policies (`ppo`, `heuristic`, `random`) with consistent KPIs.
+- Provide robust, secure, and observable APIs.
+- Deliver an operational frontend with interactive 3D network visualization.
+
+## 2. Global architecture
+
+### Backend (`backend/`)
+- Framework: FastAPI
+- Validation: Pydantic
+- Persistence: SQLite by default (PostgreSQL migration possible)
+- Migrations: Alembic
+- AI engine:
+  - explainable heuristic routing
+  - RL/PPO (Stable-Baselines3) via training/evaluation scripts
+
+### Frontend (`frontend/`)
+- Stack: React + Vite + TypeScript + TanStack Query + shadcn/ui
+- Features:
+  - triage/recommendation
+  - network admin (centres/references)
+  - patient referral workflow
+  - indicators dashboard
+  - interactive 3D graph
+  - FR/EN language toggle
+
+### Data and benchmarking
+- Public data imports (facilities, indicators, population/catchment)
+- Patient cohort simulation and policy comparison
+
+## 3. Repository structure
+
+```text
+CarePath AI/
+  backend/
+    app/                # API, services, schemas, core, db
+    scripts/            # data pipeline, simulation, RL train/eval
+    tests/              # backend tests
+    docs/               # JSON/MD benchmark and simulation reports
+    models/             # trained models (.zip)
+    requirements/       # split dependency sets
+  frontend/
+    src/
+      components/
+      pages/
+      lib/
+    package.json
+  notebooks/
+    model_benchmark_report.ipynb
+  docs/
+    release_checklist.md
+  scripts/
+    check.ps1
+  README.md
+```
+
+## 4. Prerequisites
+
+- Python 3.10+
+- Node.js 18+
+- npm 9+
+- Optional: Jupyter for benchmark notebook
+
+## 5. Quick start
+
+### Backend
 ```bash
 cd backend
 python -m venv .venv
@@ -16,11 +87,33 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Config locale (`.env.example`):
-- `DATABASE_URL` (defaut: `sqlite:///./carepath.db`)
+Minimal API install (without full RL/data stack):
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements/base.txt -r requirements/dev.txt
+```
 
-## API Backend
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
+## 6. Configuration
+
+Copy `.env.example` to `.env` and set:
+- `DATABASE_URL` (default `sqlite:///./carepath.db`)
+- `APP_ENV` (`development`/`production`)
+- `AUTH_SECRET_KEY`
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD`
+- `VIEWER_USERNAME` / `VIEWER_PASSWORD`
+
+## 7. Run services
+
+### Backend API
 ```bash
 cd backend
 python scripts/init_db.py
@@ -28,314 +121,169 @@ python scripts/seed_demo_data.py
 uvicorn app.main:app --reload
 ```
 
-Docs API: `http://127.0.0.1:8000/docs`
-
-### Endpoint metier
-- `POST /recommander`
-  - utilise `severity` dans le score
-  - renvoie `rationale` + `score_breakdown`
-- `GET /indicators?country_code=KEN`
-- `GET /indicators/latest?country_code=KEN`
-
-## Streamlit Demo UI
-
-Depuis la racine du projet:
-
+### Migrations
 ```bash
-streamlit run frontend/streamlit_app.py
+cd backend
+python scripts/migrate.py
 ```
 
-Fonctions:
-- charge centres/references via API
-- visualise graphe + chemin recommande
-- affiche destination, score, score_breakdown, rationale
-- bouton pour lancer le scenario principal et afficher KPI
+### API docs
+- Swagger: `http://127.0.0.1:8000/docs`
+- Health: `GET /api/v1/health`
 
-## One-command local demo runner
+## 8. Main business endpoints
 
-Depuis la racine du projet:
+### Auth
+- `POST /api/v1/auth/login`
 
-```bash
-python scripts/run_local_demo.py
-```
+### Recommendation
+- `POST /api/v1/recommander`
+  - `routing_policy`: `heuristic` (default), `auto`, `rl`
+  - explainability fields: `rationale`, `score_breakdown`
 
-Ce script:
-1. reset DB SQLite locale (sauf `--skip-reset`)
-2. init DB + seed reseau complexe
-3. genere rapports (`primary_demo_report`, `scenario_report`, `scenario_summary`)
-4. lance FastAPI et Streamlit
+### Network admin
+- `GET/POST/PUT/DELETE /api/v1/centres`
+- `GET/POST/PUT/DELETE /api/v1/references`
 
-Options:
-- `--api-port 8000`
-- `--ui-port 8501`
-- `--skip-reset`
+### Patient referral workflow
+- `GET/POST /api/v1/referrals/requests`
+- `POST /api/v1/referrals/requests/{id}/accept`
+- `POST /api/v1/referrals/requests/{id}/start-transfer`
+- `POST /api/v1/referrals/requests/{id}/complete`
+- `POST /api/v1/referrals/requests/{id}/reject`
+- `POST /api/v1/referrals/requests/{id}/cancel`
 
-## Simulation et scenarios
+### Indicators
+- `GET /api/v1/indicators`
+- `GET /api/v1/indicators/latest`
 
-### Batch simulation (heuristic ou random)
+## 9. Frontend features
 
+- Triage form + policy selector + explainable result panel
+- Referral workflow page with filters/search/pagination
+- Network admin CRUD for centres/references
+- 3D graph with zoom/rotate/hover/focus/click-to-focus
+- Indicators exploration and export
+- System monitoring page
+- Global FR/EN switch
+
+## 10. Simulation and RL benchmark
+
+### Batch simulation
 ```bash
 cd backend
 python scripts/simulate_batch.py --seed-complex --patients 120 --source C_LOCAL_A --speciality maternal --severity medium --policy heuristic --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --fallback-policy force_least_loaded --fallback-overload-penalty 30
 ```
 
-Mode random:
-
-```bash
-python scripts/simulate_batch.py --seed-complex --patients 120 --source C_LOCAL_A --speciality maternal --severity medium --policy random --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --fallback-policy none
-```
-
-KPI inclus:
-- `failure_rate`, `fallback_rate`
-- `avg_travel_minutes`, `avg_wait_minutes`, `avg_score`
-- `entropy_norm` (plus haut = plus equitable)
-- `hhi` (plus bas = moins concentre)
-
-### Runner multi-scenarios
-
-```bash
-cd backend
-python scripts/run_complex_scenarios.py --patients 120 --output docs/scenario_report.json
-python scripts/summarize_scenarios.py --input docs/scenario_report.json --output docs/scenario_summary.md --weight-hhi 0.5 --weight-entropy-gap 0.5
-```
-
-Le resume Markdown contient une section Fairness et un ranking composite configurable.
-
-## RL: Train + Evaluate (PPO vs Heuristic vs Random)
-
-### Train
-
+### PPO training
 ```bash
 cd backend
 python scripts/train_rl.py --seed-complex --source C_LOCAL_A --speciality maternal --patients-per-episode 80 --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --overload-penalty 30 --timesteps 20000 --learning-rate 3e-4 --seed 42 --model-out models/ppo_referral
 ```
 
-### Evaluate
-
+### PPO vs Heuristic vs Random evaluation
 ```bash
 cd backend
 python scripts/evaluate_rl.py --seed-complex --model-path models/ppo_referral.zip --episodes 30 --source C_LOCAL_A --speciality maternal --patients-per-episode 80 --wait-increment 3 --recovery-interval 5 --recovery-amount 2 --overload-penalty 30 --seed 42
 ```
 
-Sortie JSON harmonisee pour 3 methodes:
-- `ppo`
-- `heuristic`
-- `random`
-
-Chaque bloc contient:
-- `avg_reward_per_episode`
-- `avg_overloads_per_episode`
-- `avg_travel`, `avg_wait`
-- `failure_rate`, `fallback_rate`
-- `entropy_norm`, `hhi`
-- `destination_distribution`
-
-## Scenario principal de demo
-
+### Kenya full pipeline
 ```bash
 cd backend
-python scripts/run_primary_demo.py --patients 120 --output docs/primary_demo_report.json
+python scripts/pipeline_kenya.py --reset-db
 ```
 
-## Real data import (Healthsites API v3)
-
-1. Configure env vars (do not hardcode API key):
-
-```bash
-cp .env.example .env
-# then set HEALTHSITES_API_KEY in your shell
-```
-
-PowerShell example:
-
-```powershell
-$env:HEALTHSITES_API_KEY=\"YOUR_KEY\"
-$env:HEALTHSITES_BASE_URL=\"https://healthsites.io\"
-```
-
-2. Import facilities into `centres` (upsert by `(osm_type, osm_id)`):
-
+### Final Kenya benchmark
 ```bash
 cd backend
-python scripts/import_healthsites.py --country=CM --output=json --flat-properties=true --tag-format=osm --max-pages=5
+python scripts/benchmark_policies_kenya.py --train-if-missing --timesteps 120000 --episodes 40 --model-path models/ppo_referral_kenya_mapped_v3.zip --travel-weight 1.1 --wait-weight 1.0 --fairness-penalty 6 --ent-coef 0.015 --output-json docs/final_benchmark_kenya_mapped_v3.json --output-md docs/final_benchmark_kenya_mapped_v3.md
 ```
 
-Optional filters:
-- `--extent=minLng,minLat,maxLng,maxLat`
-- `--from=YYYY-MM-DD`
-- `--to=YYYY-MM-DD`
-- `--output=json|geojson`
+## 11. Reference benchmark snapshot
 
-3. Build referral references from imported geo coordinates:
+Based on `backend/docs/final_benchmark_kenya_mapped_v3.json`:
+- Composite winner: `ppo`
+- Best reward: `ppo`
+- Fairness trade-off: `random` spreads load better (high entropy / low hhi) but has much worse travel time.
 
+## 12. Added notebook: model test results
+
+Notebook path:
+- `notebooks/model_benchmark_report.ipynb`
+
+Notebook content:
+- automatic loading of `backend/docs/*benchmark*.json`
+- benchmark consolidation into DataFrame
+- policy comparison (`ppo`, `heuristic`, `random`)
+- charts for reward, travel, wait, fairness, composite score
+- automatic winner summary by scenario
+- destination distribution inspection per policy
+
+Run notebook:
 ```bash
-python scripts/build_edges_from_geo.py --k-nearest=2 --speed-kmh=40
+pip install jupyter pandas matplotlib
+jupyter notebook notebooks/model_benchmark_report.ipynb
 ```
 
-4. Run API and test recommendation:
+## 13. Quality, tests, CI
 
-```bash
-uvicorn app.main:app --reload
-```
-
-Healthsites mapping rules implemented:
-- Level:
-  - hospital / tertiary-like => `tertiary`
-  - clinic / health_center => `secondary`
-  - dispensary / health_post => `primary`
-  - unknown => `primary`
-- Specialities:
-  - maternity/obstetric-like tags => include `maternal`
-  - pediatric/children-like tags => include `pediatric`
-  - always fallback to `general` if nothing detected
-- Defaults by level:
-  - `capacity_max`: primary=10, secondary=30, tertiary=120
-  - `capacity_available`: initialized to `capacity_max`
-  - `estimated_wait_minutes`: primary=15, secondary=30, tertiary=60
-
-## Tests
-
+### Backend tests
 ```bash
 cd backend
 pytest -q
 ```
 
-Couverture inclut:
-- CRUD admin
-- `/recommander` + payload explicable
-- regression scoring + effet severity
-- random baseline valide
-- equite/saturation
-- import Healthsites mocke + upsert
-- construction d'edges geo + travel_minutes
-
-## Offline public datasets workflow (HDX + WorldPop + WHO/DHS indicators)
-
-Prerequisites (download locally first):
-- HDX / Global Healthsites Mapping Project facilities file (`.geojson` or `.csv`)
-- WorldPop population raster (`.tif`)
-- WDI/WHO indicator files for hospital beds, physicians, maternal mortality, under-5 mortality
-- Optional: DHS-informed ratios for maternal/pediatric demand and severity distribution
-
-All processing runs locally and offline once files are downloaded.
-
-### 1) Import facilities from local file (HDX/Healthsites export)
-
+### Frontend checks
 ```bash
-cd backend
-python scripts/import_facilities_from_file.py --input data/facilities.geojson --format geojson
+cd frontend
+npm run typecheck
+npm run lint
+npm run test -- --run
 ```
 
-CSV example:
-
-```bash
-python scripts/import_facilities_from_file.py --input data/facilities.csv --format csv --lat-column latitude --lon-column longitude --name-column name --facility-type-column facility_type
+### Local one-shot check
+```powershell
+.\scripts\check.ps1
 ```
 
-Option Geofabrik (shapefile POI):
+### CI workflows
+- `.github/workflows/ci.yml`
+- `.github/workflows/secret-scan.yml`
 
-```bash
-python scripts/import_geofabrik_pois.py --input-shp "data/kenya/Geofabrik/gis_osm_pois_free_1.shp" --include-fclass hospital,clinic,doctors,dentist --exclude-empty-name
-```
+## 14. Security and observability
 
-Optional quality report during import:
+- Bearer token auth
+- RBAC (`admin`, `viewer`)
+- `X-Request-ID` in responses
+- structured JSON logs
+- standardized error payloads
+- in-memory rate limiting (auth + admin writes)
 
-```bash
-python scripts/import_geofabrik_pois.py --input-shp "data/kenya/Geofabrik/gis_osm_pois_free_1.shp" --include-fclass hospital,clinic,doctors,dentist --exclude-empty-name --quality-report docs/geofabrik_import_quality.json
-```
+## 15. Data privacy
 
-### 2) Compute catchment population from WorldPop raster
+Default workflow uses aggregated public data (facilities, gridded population, indicators).
+No patient-identifiable data is required by default.
 
-```bash
-python scripts/calc_catchment_population.py --raster data/worldpop.tif --radius-km 10
-```
+## 16. Known limitations
 
-### 3) Import country indicators (WDI CSV)
+- Calibration quality depends on source geospatial data quality.
+- RL behavior is sensitive to hyperparameters and simulation settings.
+- Benchmarks should be re-run after major scoring/weight changes.
 
-```bash
-python scripts/import_wdi_indicators.py --input-dir data/kenya --country-code KEN --latest-only
-python scripts/build_indicator_profile.py --country-code KEN --output docs/indicator_profile.json
-```
+## 17. Suggested roadmap
 
-### 4) Calibrate capacities from beds/10,000 population
+- Experiment tracking for RL runs (MLflow or equivalent)
+- Centralized observability metrics (Prometheus/Grafana)
+- Multi-country robustness campaign
+- Deployment packaging (Docker Compose/Kubernetes)
 
-```bash
-python scripts/calibrate_capacity.py --beds-per-10000 18 --availability-ratio 0.8
-```
+## 18. Operational runbook (short)
 
-Option WHO GHO (API publique):
+1. Init DB + seed
+2. Start API
+3. Start frontend
+4. Check `/api/v1/health`
+5. Validate auth + referral workflow
+6. Validate benchmark/notebook before release
 
-```bash
-python scripts/fetch_who_gho.py --indicator HWF_0000 --country CM
-python scripts/calibrate_capacity.py --who-indicator HWF_0000 --who-country CM --availability-ratio 0.8
-```
-
-Option annee precise:
-
-```bash
-python scripts/calibrate_capacity.py --who-indicator HWF_0000 --who-country CM --who-year 2021
-```
-
-### 5) Build referral edges from coordinates
-
-```bash
-python scripts/build_edges_from_geo.py --k-nearest 2 --speed-kmh 40 --bidirectional
-```
-
-Optional local OSRM:
-
-```bash
-python scripts/build_edges_from_geo.py --k-nearest 2 --osrm-server http://127.0.0.1:5000 --bidirectional
-```
-
-### 6) Run simulation with population-weighted patient generation
-
-```bash
-python scripts/simulate_batch.py --patients 200 --policy heuristic --sample-source-by-catchment --case-mix-mode mixed --maternal-ratio 0.35 --pediatric-ratio 0.25 --general-ratio 0.40 --severity-mode mixed --severity-low-ratio 0.60 --severity-medium-ratio 0.30 --severity-high-ratio 0.10
-```
-
-You can reuse the recommended ratios generated in `docs/indicator_profile.json`.
-
-Validate data quality in DB:
-
-```bash
-python scripts/validate_centres_quality.py --output docs/centres_quality_report.json
-```
-
-### 7) One-command Kenya pipeline
-
-```bash
-python scripts/pipeline_kenya.py --reset-db
-```
-
-This executes the full local Kenya workflow end-to-end:
-- DB init/reset
-- Geofabrik POI import
-- WorldPop catchment population
-- WDI indicators import + indicator profile build
-- Capacity calibration
-- Edge build + isolated-centre repair
-- Final simulation sanity check
-
-### 8) Kenya 3-policy benchmark (Random vs Heuristic vs PPO)
-
-```bash
-python scripts/benchmark_policies_kenya.py --train-if-missing --timesteps 6000 --episodes 20 --output-json docs/final_benchmark_kenya.json --output-md docs/final_benchmark_kenya.md
-```
-
-This generates a comparable benchmark with the same environment settings for all three methods.
-
-Recommended tuned baseline (v3):
-
-```bash
-python scripts/benchmark_policies_kenya.py --train-if-missing --timesteps 120000 --episodes 40 --model-path models/ppo_referral_kenya_mapped_v3.zip --travel-weight 1.1 --wait-weight 1.0 --fairness-penalty 6 --ent-coef 0.015 --output-json docs/final_benchmark_kenya_mapped_v3.json --output-md docs/final_benchmark_kenya_mapped_v3.md
-```
-
-Current recommendation for demo:
-- model: `models/ppo_referral_kenya_mapped_v3.zip`
-- benchmark report: `backend/docs/final_benchmark_kenya_mapped_v3.json`
-
-Privacy note:
-- The workflow uses aggregated public datasets (facilities and gridded population).
-- No individual-level or identifiable patient data is required.
-- Outputs are planning-oriented indicators, not personal medical records.
+For detailed pre-release controls, see `docs/release_checklist.md`.

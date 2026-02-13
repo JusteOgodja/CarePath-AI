@@ -45,6 +45,40 @@ interface Props {
   centre: Centre | null;
 }
 
+const toFormDefaults = (centre: Centre | null): FormData => {
+  if (!centre) {
+    return {
+      id: "",
+      name: "",
+      level: "primary",
+      specialities_input: "",
+      capacity_max: 0,
+      capacity_available: 0,
+      estimated_wait_minutes: 0,
+      lat: 0,
+      lon: 0,
+      catchment_population: 0,
+    };
+  }
+
+  const level = ["primary", "secondary", "tertiary"].includes(centre.level)
+    ? (centre.level as "primary" | "secondary" | "tertiary")
+    : "primary";
+
+  return {
+    id: centre.id,
+    name: centre.name,
+    level,
+    specialities_input: centre.specialities.join(", "),
+    capacity_max: centre.capacity_max ?? 0,
+    capacity_available: centre.capacity_available ?? 0,
+    estimated_wait_minutes: centre.estimated_wait_minutes ?? 0,
+    lat: centre.lat ?? 0,
+    lon: centre.lon ?? 0,
+    catchment_population: centre.catchment_population ?? 0,
+  };
+};
+
 export function CentreModal({ open, onOpenChange, centre }: Props) {
   const queryClient = useQueryClient();
   const isEdit = !!centre;
@@ -57,40 +91,12 @@ export function CentreModal({ open, onOpenChange, centre }: Props) {
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: centre
-      ? { ...centre, specialities_input: centre.specialities.join(", ") }
-      : {
-          id: "",
-          name: "",
-          level: "primary",
-          specialities_input: "",
-          capacity_max: 0,
-          capacity_available: 0,
-          estimated_wait_minutes: 0,
-          lat: 0,
-          lon: 0,
-          catchment_population: 0,
-        },
+    defaultValues: toFormDefaults(centre),
   });
 
   React.useEffect(() => {
     if (open) {
-      reset(
-        centre
-          ? { ...centre, specialities_input: centre.specialities.join(", ") }
-          : {
-              id: "",
-              name: "",
-              level: "primary",
-              specialities_input: "",
-              capacity_max: 0,
-              capacity_available: 0,
-              estimated_wait_minutes: 0,
-              lat: 0,
-              lon: 0,
-              catchment_population: 0,
-            }
-      );
+      reset(toFormDefaults(centre));
     }
   }, [open, centre, reset]);
 
