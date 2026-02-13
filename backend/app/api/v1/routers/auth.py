@@ -1,3 +1,4 @@
+import hmac
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.auth import AuthRole, create_access_token
@@ -20,9 +21,12 @@ def login(
     viewer_user, viewer_pass = get_viewer_credentials()
 
     role: AuthRole | None = None
-    if username == admin_user and password == admin_pass:
+    admin_match = hmac.compare_digest(username, admin_user) and hmac.compare_digest(password, admin_pass)
+    viewer_match = hmac.compare_digest(username, viewer_user) and hmac.compare_digest(password, viewer_pass)
+
+    if admin_match:
         role = "admin"
-    elif username == viewer_user and password == viewer_pass:
+    elif viewer_match:
         role = "viewer"
 
     if role is None:

@@ -19,25 +19,33 @@ import { motion } from "framer-motion";
 import type { RecommandationRequest, RecommandationResponse } from "@/lib/types";
 import { RecommendationResult } from "./RecommendationResult";
 import { ApiClientError } from "@/lib/api/client";
+import { useI18n } from "@/lib/i18n";
 
 const schema = z.object({
   patient_id: z.string().trim().min(1, "Patient ID requis").max(100),
   current_centre_id: z.string().min(1, "Centre requis"),
   needed_speciality: z.string().min(1, "Spécialité requise"),
   severity: z.enum(["low", "medium", "high"]),
+  routing_policy: z.enum(["heuristic", "auto", "rl"]),
 });
 
 type FormData = z.infer<typeof schema>;
 
-const severityOptions = [
-  { value: "low" as const, label: "Faible", color: "bg-severity-low" },
-  { value: "medium" as const, label: "Modéré", color: "bg-severity-medium" },
-  { value: "high" as const, label: "Élevé", color: "bg-severity-high" },
-];
-
 const specialities = ["maternal", "pediatric", "general"];
 
 export function TriageForm() {
+  const { language } = useI18n();
+  const isFr = language === "fr";
+  const severityOptions = [
+    { value: "low" as const, label: isFr ? "Faible" : "Low", color: "bg-severity-low" },
+    { value: "medium" as const, label: isFr ? "Modéré" : "Medium", color: "bg-severity-medium" },
+    { value: "high" as const, label: isFr ? "Élevé" : "High", color: "bg-severity-high" },
+  ];
+  const routingPolicies = [
+    { value: "heuristic" as const, label: isFr ? "Heuristique (rapide)" : "Heuristic (fast)" },
+    { value: "auto" as const, label: isFr ? "Auto (RL puis fallback)" : "Auto (RL then fallback)" },
+    { value: "rl" as const, label: isFr ? "RL uniquement" : "RL only" },
+  ];
   const [result, setResult] = React.useState<RecommandationResponse | null>(null);
 
   const { data: centres = [], isLoading: centresLoading } = useQuery({
@@ -63,6 +71,7 @@ export function TriageForm() {
       current_centre_id: "",
       needed_speciality: "",
       severity: "medium",
+      routing_policy: "heuristic",
     },
   });
 
@@ -81,15 +90,15 @@ export function TriageForm() {
     if (mutation.error instanceof ApiClientError) {
       if (mutation.error.status === 400) {
         const msg = mutation.error.message.toLowerCase();
-        if (msg.includes("vide") || msg.includes("empty")) return "Le réseau est vide, ajoutez des centres d'abord.";
-        if (msg.includes("atteignable") || msg.includes("reachable")) return "Aucune destination atteignable depuis ce centre.";
-        if (msg.includes("compatible")) return "Aucune destination compatible avec cette spécialité.";
+        if (msg.includes("vide") || msg.includes("empty")) return isFr ? "Le réseau est vide, ajoutez des centres d'abord." : "Network is empty, add centers first.";
+        if (msg.includes("atteignable") || msg.includes("reachable")) return isFr ? "Aucune destination atteignable depuis ce centre." : "No reachable destination from this center.";
+        if (msg.includes("compatible")) return isFr ? "Aucune destination compatible avec cette spécialité." : "No destination compatible with this specialty.";
         return mutation.error.message;
       }
       return mutation.error.message;
     }
-    return "Une erreur inattendue est survenue.";
-  }, [mutation.error]);
+    return isFr ? "Une erreur inattendue est survenue." : "An unexpected error occurred.";
+  }, [isFr, mutation.error]);
 
   return (
     <div className="space-y-8">
@@ -103,8 +112,8 @@ export function TriageForm() {
             <Stethoscope className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h2 className="text-[15px] font-bold">Recommandation de transfert</h2>
-            <p className="text-xs text-muted-foreground">Renseignez les informations patient pour obtenir une recommandation</p>
+            <h2 className="text-[15px] font-bold">{isFr ? "Recommandation de transfert" : "Transfer recommendation"}</h2>
+            <p className="text-xs text-muted-foreground">{isFr ? "Renseignez les informations patient pour obtenir une recommandation" : "Fill patient data to get a recommendation"}</p>
           </div>
         </div>
 
@@ -124,7 +133,7 @@ export function TriageForm() {
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger className="h-11">
-                      <SelectValue placeholder={centresLoading ? "Chargement..." : "Sélectionner un centre"} />
+                      <SelectValue placeholder={centresLoading ? (isFr ? "Chargement..." : "Loading...") : (isFr ? "Sélectionner un centre" : "Select a center")} />
                     </SelectTrigger>
                     <SelectContent>
                       {centres.map((c) => (
@@ -147,7 +156,7 @@ export function TriageForm() {
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Choisir une spécialité" />
+                      <SelectValue placeholder={isFr ? "Choisir une spécialité" : "Choose specialty"} />
                     </SelectTrigger>
                     <SelectContent>
                       {specialities.map((s) => (
@@ -163,7 +172,7 @@ export function TriageForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sévérité</Label>
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{isFr ? "Sévérité" : "Severity"}</Label>
               <Controller
                 name="severity"
                 control={control}
@@ -186,15 +195,37 @@ export function TriageForm() {
                 )}
               />
             </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{isFr ? "Politique de routage" : "Routing policy"}</Label>
+              <Controller
+                name="routing_policy"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {routingPolicies.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
           </div>
 
           <div className="flex gap-3 pt-2">
             <Button type="submit" disabled={mutation.isPending} className="h-11 px-6 shadow-card" style={{ background: "var(--gradient-primary)" }}>
               {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-              Recommander
+              {isFr ? "Recommander" : "Recommend"}
             </Button>
             <Button type="button" variant="outline" onClick={handleReset} className="h-11">
-              <RotateCcw className="mr-2 h-4 w-4" /> Réinitialiser
+              <RotateCcw className="mr-2 h-4 w-4" /> {isFr ? "Réinitialiser" : "Reset"}
             </Button>
           </div>
         </form>

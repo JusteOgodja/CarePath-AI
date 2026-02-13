@@ -3,9 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Network, Loader2 } from "lucide-react";
 import { listCentres, listReferences } from "@/lib/api/endpoints";
 import type { Centre, Reference } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ErrorState } from "@/components/common/ErrorState";
 import { EmptyState } from "@/components/common/EmptyState";
+import { useI18n } from "@/lib/i18n";
 
 type SimNode = {
   centre: Centre;
@@ -39,6 +42,13 @@ const levelColors: Record<string, string> = {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function normalizeAngle(angle: number): number {
+  let a = angle;
+  while (a > Math.PI) a -= Math.PI * 2;
+  while (a < -Math.PI) a += Math.PI * 2;
+  return a;
 }
 
 function buildSimulation(centres: Centre[], refs: Reference[]): { nodes: SimNode[]; links: SimLink[] } {
@@ -79,8 +89,12 @@ function project(node: SimNode, width: number, height: number): RenderPoint {
 }
 
 export default function NetworkGraphPage() {
+  const { language } = useI18n();
+  const isFr = language === "fr";
   const [levelFilter, setLevelFilter] = React.useState("all");
   const [hovered, setHovered] = React.useState<Centre | null>(null);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [focusTargetId, setFocusTargetId] = React.useState<string | null>(null);
   const [canvasSize, setCanvasSize] = React.useState({ w: 1100, h: 680 });
 
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -90,8 +104,10 @@ export default function NetworkGraphPage() {
   const zoomRef = React.useRef(1);
   const rotXRef = React.useRef(-0.18);
   const rotYRef = React.useRef(0.32);
-  const dragRef = React.useRef<{ active: boolean; x: number; y: number }>({ active: false, x: 0, y: 0 });
+  const dragRef = React.useRef<{ active: boolean; x: number; y: number; moved: boolean }>({ active: false, x: 0, y: 0, moved: false });
   const spinRef = React.useRef({ vx: 0, vy: 0 });
+  const renderNodesRef = React.useRef<Array<{ sx: number; sy: number; sr: number; centre: Centre }>>([]);
+  const lowerSearchTerm = searchTerm.trim().toLowerCase();
 
   const centresQuery = useQuery({
     queryKey: ["centres"],
@@ -124,6 +140,37 @@ export default function NetworkGraphPage() {
     [refsQuery.data, centreMap]
   );
 
+  const focusedCentre = React.useMemo(() => {
+    if (!focusTargetId) return null;
+    return filteredCentres.find((c) => c.id === focusTargetId) ?? null;
+  }, [filteredCentres, focusTargetId]);
+
+  const resetCamera = React.useCallback(() => {
+    setFocusTargetId(null);
+    zoomRef.current = 1;
+    rotXRef.current = -0.18;
+    rotYRef.current = 0.32;
+    spinRef.current = { vx: 0, vy: 0 };
+  }, []);
+
+  const handleSearchFocus = React.useCallback(() => {
+    if (!lowerSearchTerm) {
+      setFocusTargetId(null);
+      setHovered(null);
+      return;
+    }
+
+    const match = filteredCentres.find(
+      (c) => c.id.toLowerCase().includes(lowerSearchTerm) || c.name.toLowerCase().includes(lowerSearchTerm)
+    );
+
+    if (!match) return;
+
+    setFocusTargetId(match.id);
+    setHovered(match);
+    hoveredIdRef.current = match.id;
+  }, [filteredCentres, lowerSearchTerm]);
+
   React.useEffect(() => {
     const node = containerRef.current;
     if (!node) return;
@@ -131,9 +178,10 @@ export default function NetworkGraphPage() {
     const observer = new ResizeObserver((entries) => {
       const rect = entries[0]?.contentRect;
       if (!rect) return;
+      const width = Math.floor(rect.width) - 8;
       setCanvasSize({
-        w: Math.max(680, Math.floor(rect.width) - 8),
-        h: Math.max(520, Math.floor(rect.width * 0.56)),
+        w: Math.max(320, width),
+        h: Math.max(360, Math.floor(width < 640 ? width * 0.8 : width * 0.56)),
       });
     });
 
@@ -158,6 +206,7 @@ export default function NetworkGraphPage() {
     const sim = buildSimulation(filteredCentres, filteredRefs);
     const nodes = sim.nodes;
     const links = sim.links;
+    const indexById = new Map(nodes.map((n, i) => [n.centre.id, i]));
 
     const mouse = { x: -10000, y: -10000 };
     let raf = 0;
@@ -172,6 +221,7 @@ export default function NetworkGraphPage() {
       if (drag.active) {
         const dx = x - drag.x;
         const dy = y - drag.y;
+        if (Math.abs(dx) + Math.abs(dy) > 1.5) drag.moved = true;
         rotYRef.current += dx * 0.006;
         rotXRef.current = clamp(rotXRef.current + dy * 0.005, -1.2, 1.2);
         spinRef.current.vy = dx * 0.00035;
@@ -194,7 +244,35 @@ export default function NetworkGraphPage() {
     const onDown = (ev: MouseEvent) => {
       if (ev.button !== 0) return;
       const rect = canvas.getBoundingClientRect();
-      dragRef.current = { active: true, x: ev.clientX - rect.left, y: ev.clientY - rect.top };
+      dragRef.current = { active: true, x: ev.clientX - rect.left, y: ev.clientY - rect.top, moved: false };
+    };
+    const onCanvasUp = (ev: MouseEvent) => {
+      const drag = dragRef.current;
+      if (!drag.active) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const y = ev.clientY - rect.top;
+
+      if (!drag.moved) {
+        let nearest: { centre: Centre; d: number } | null = null;
+        for (const rn of renderNodesRef.current) {
+          const dx = x - rn.sx;
+          const dy = y - rn.sy;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < rn.sr + 9 && (!nearest || d < nearest.d)) {
+            nearest = { centre: rn.centre, d };
+          }
+        }
+
+        if (nearest) {
+          setFocusTargetId(nearest.centre.id);
+          setHovered(nearest.centre);
+          hoveredIdRef.current = nearest.centre.id;
+        }
+      }
+
+      dragRef.current.active = false;
     };
     const onUp = () => {
       dragRef.current.active = false;
@@ -206,6 +284,7 @@ export default function NetworkGraphPage() {
     };
 
     canvas.addEventListener("mousedown", onDown);
+    canvas.addEventListener("mouseup", onCanvasUp);
     window.addEventListener("mouseup", onUp);
     canvas.addEventListener("mousemove", onMove);
     canvas.addEventListener("mouseleave", onLeave);
@@ -270,11 +349,32 @@ export default function NetworkGraphPage() {
         n.z += n.vz;
       }
 
-      rotYRef.current += spinRef.current.vy;
-      rotXRef.current = clamp(rotXRef.current + spinRef.current.vx, -1.2, 1.2);
-      spinRef.current.vx *= 0.93;
-      spinRef.current.vy *= 0.93;
-      if (!dragRef.current.active && Math.abs(spinRef.current.vx) + Math.abs(spinRef.current.vy) < 0.00006) {
+      const focusIdx = focusTargetId ? indexById.get(focusTargetId) : undefined;
+
+      if (!dragRef.current.active && focusIdx != null) {
+        const target = nodes[focusIdx];
+        const targetYaw = Math.atan2(-target.x, target.z);
+        const z1AtTargetYaw = -target.x * Math.sin(targetYaw) + target.z * Math.cos(targetYaw);
+        const targetPitch = clamp(Math.atan2(target.y, Math.max(28, z1AtTargetYaw)), -0.95, 0.95);
+
+        const yawDelta = normalizeAngle(targetYaw - rotYRef.current);
+        rotYRef.current += yawDelta * 0.08;
+        rotXRef.current += (targetPitch - rotXRef.current) * 0.08;
+        zoomRef.current += (1.42 - zoomRef.current) * 0.06;
+        spinRef.current.vx *= 0.75;
+        spinRef.current.vy *= 0.75;
+      } else {
+        rotYRef.current += spinRef.current.vy;
+        rotXRef.current = clamp(rotXRef.current + spinRef.current.vx, -1.2, 1.2);
+        spinRef.current.vx *= 0.93;
+        spinRef.current.vy *= 0.93;
+      }
+
+      if (
+        !focusTargetId &&
+        !dragRef.current.active &&
+        Math.abs(spinRef.current.vx) + Math.abs(spinRef.current.vy) < 0.00006
+      ) {
         rotYRef.current += 0.0015;
       }
 
@@ -315,6 +415,13 @@ export default function NetworkGraphPage() {
         return p;
       });
 
+      renderNodesRef.current = projected.map((p) => ({
+        sx: p.sx,
+        sy: p.sy,
+        sr: p.sr,
+        centre: nodes[p.i].centre,
+      }));
+
       for (let i = 0; i < links.length; i += 1) {
         const link = links[i];
         const a = projected[link.source];
@@ -346,15 +453,16 @@ export default function NetworkGraphPage() {
       for (const p of projected) {
         const node = nodes[p.i];
         const color = levelColors[node.centre.level] ?? "#4fa3ff";
+        const isFocused = focusTargetId != null && node.centre.id === focusTargetId;
 
         ctx.beginPath();
-        ctx.fillStyle = `${color}33`;
-        ctx.arc(p.sx, p.sy, p.sr * 1.8, 0, Math.PI * 2);
+        ctx.fillStyle = isFocused ? "rgba(255, 255, 255, 0.45)" : `${color}33`;
+        ctx.arc(p.sx, p.sy, isFocused ? p.sr * 2.4 : p.sr * 1.8, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = color;
-        ctx.arc(p.sx, p.sy, p.sr, 0, Math.PI * 2);
+        ctx.arc(p.sx, p.sy, isFocused ? p.sr * 1.25 : p.sr, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
@@ -391,12 +499,13 @@ export default function NetworkGraphPage() {
     return () => {
       cancelAnimationFrame(raf);
       canvas.removeEventListener("mousedown", onDown);
+      canvas.removeEventListener("mouseup", onCanvasUp);
       window.removeEventListener("mouseup", onUp);
       canvas.removeEventListener("mousemove", onMove);
       canvas.removeEventListener("mouseleave", onLeave);
       canvas.removeEventListener("wheel", onWheel);
     };
-  }, [canvasSize.h, canvasSize.w, filteredCentres, filteredRefs]);
+  }, [canvasSize.h, canvasSize.w, filteredCentres, filteredRefs, focusTargetId]);
 
   return (
     <div className="space-y-6 pb-20 lg:pb-0">
@@ -406,21 +515,21 @@ export default function NetworkGraphPage() {
             <Network className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1>Graphe Réseau 3D</h1>
-            <p>Vue dynamique des connexions entre hôpitaux</p>
+            <h1>{isFr ? "Graphe Réseau 3D" : "3D Network Graph"}</h1>
+            <p>{isFr ? "Vue dynamique des connexions entre hôpitaux" : "Dynamic view of hospital connections"}</p>
           </div>
         </div>
       </div>
 
       <div className="premium-card p-4 flex flex-wrap items-center gap-3">
         <div className="space-y-1.5">
-          <p className="stat-label">Filtre niveau</p>
+          <p className="stat-label">{isFr ? "Filtre niveau" : "Level filter"}</p>
           <Select value={levelFilter} onValueChange={setLevelFilter}>
             <SelectTrigger className="w-48 h-10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tous</SelectItem>
+              <SelectItem value="all">{isFr ? "Tous" : "All"}</SelectItem>
               <SelectItem value="primary">Primary</SelectItem>
               <SelectItem value="secondary">Secondary</SelectItem>
               <SelectItem value="tertiary">Tertiary</SelectItem>
@@ -430,11 +539,11 @@ export default function NetworkGraphPage() {
 
         <div className="ml-auto flex gap-3 text-xs">
           <div className="kpi-card py-3 px-4 min-w-[120px]">
-            <p className="stat-label">Hôpitaux</p>
+            <p className="stat-label">{isFr ? "Hôpitaux" : "Hospitals"}</p>
             <p className="text-xl font-bold">{filteredCentres.length}</p>
           </div>
           <div className="kpi-card py-3 px-4 min-w-[120px]">
-            <p className="stat-label">Connexions</p>
+            <p className="stat-label">{isFr ? "Connexions" : "Connections"}</p>
             <p className="text-xl font-bold">{filteredRefs.length}</p>
           </div>
         </div>
@@ -443,13 +552,13 @@ export default function NetworkGraphPage() {
       {isLoading && (
         <div className="premium-card p-8 flex items-center gap-3 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Chargement du graphe...
+          {isFr ? "Chargement du graphe..." : "Loading graph..."}
         </div>
       )}
 
       {error && (
         <ErrorState
-          message="Impossible de charger le graphe réseau"
+          message={isFr ? "Impossible de charger le graphe réseau" : "Unable to load network graph"}
           onRetry={() => {
             centresQuery.refetch();
             refsQuery.refetch();
@@ -458,28 +567,69 @@ export default function NetworkGraphPage() {
       )}
 
       {!isLoading && !error && filteredCentres.length === 0 && (
-        <EmptyState title="Aucun hôpital visible" description="Vérifiez le filtre ou ajoutez des centres." />
+        <EmptyState title={isFr ? "Aucun hôpital visible" : "No visible hospitals"} description={isFr ? "Vérifiez le filtre ou ajoutez des centres." : "Check filter or add centers."} />
       )}
 
       {!isLoading && !error && filteredCentres.length > 0 && (
-        <div ref={containerRef} className="premium-card p-2 relative overflow-hidden">
-          <canvas ref={canvasRef} className="w-full rounded-xl bg-muted/20 cursor-crosshair" />
-
-          <div className="absolute left-4 top-4 rounded-lg bg-card/90 border border-border/60 px-3 py-2 text-xs text-muted-foreground backdrop-blur-sm">
-            Molette: zoom | Glisser: rotation | Survol: détails du nœud
+        <div ref={containerRef} className="premium-card p-2 md:p-2 p-3 relative overflow-hidden">
+          <div className="z-10 rounded-lg bg-card/95 border border-border/60 px-3 py-2 text-xs text-muted-foreground backdrop-blur-sm md:absolute md:left-4 md:top-4">
+            {isFr ? "Molette: zoom | Glisser: rotation | Survol: détails du nœud" : "Wheel: zoom | Drag: rotate | Hover: node details"}
           </div>
 
+          <div className="z-10 mt-2 flex flex-col gap-2 md:mt-0 md:absolute md:right-4 md:top-4 md:items-end">
+            <div className="flex w-full items-center gap-2 rounded-lg border border-border/60 bg-card/95 p-2 backdrop-blur-sm md:w-auto">
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearchFocus();
+                }}
+                className="h-9 flex-1 text-xs md:w-56 md:flex-none md:h-8"
+                placeholder={isFr ? "Chercher centre (nom ou ID)" : "Search center (name or ID)"}
+              />
+              <Button size="sm" variant="outline" className="h-9 text-xs md:h-8" onClick={handleSearchFocus}>
+                {isFr ? "Focus" : "Focus"}
+              </Button>
+            </div>
+
+            <div className="flex w-full flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-card/95 p-2 backdrop-blur-sm md:w-auto md:flex-nowrap">
+              <Button size="sm" variant="outline" className="h-9 w-9 p-0 md:h-8 md:w-8" onClick={() => (zoomRef.current = clamp(zoomRef.current * 1.12, 0.45, 2.6))}>+</Button>
+              <Button size="sm" variant="outline" className="h-9 w-9 p-0 md:h-8 md:w-8" onClick={() => (zoomRef.current = clamp(zoomRef.current / 1.12, 0.45, 2.6))}>-</Button>
+              <Button size="sm" variant="outline" className="h-9 text-xs md:h-8" onClick={resetCamera}>{isFr ? "Reset caméra" : "Reset camera"}</Button>
+              {focusedCentre && (
+                <Button size="sm" variant="outline" className="h-9 text-xs md:h-8" onClick={() => setFocusTargetId(null)}>{isFr ? "Stop focus" : "Stop focus"}</Button>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-border/60 bg-card/95 px-3 py-2 text-xs backdrop-blur-sm">
+              <p className="font-semibold mb-1">{isFr ? "Légende" : "Legend"}</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: levelColors.primary }} /> Primary</div>
+                <div className="flex items-center gap-2"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: levelColors.secondary }} /> Secondary</div>
+                <div className="flex items-center gap-2"><span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: levelColors.tertiary }} /> Tertiary</div>
+              </div>
+            </div>
+          </div>
+
+          <canvas ref={canvasRef} className="mt-3 md:mt-0 w-full rounded-xl bg-muted/20 cursor-crosshair" />
+
           {hovered && (
-            <div className="absolute right-4 top-4 max-w-[320px] rounded-xl border border-border/60 bg-card/95 p-4 shadow-card backdrop-blur-md">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Hôpital</p>
+            <div className="mt-2 rounded-xl border border-border/60 bg-card/95 p-4 shadow-card backdrop-blur-md md:absolute md:right-4 md:top-[170px] md:mt-0 md:max-w-[320px]">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">{isFr ? "Hôpital" : "Hospital"}</p>
               <p className="text-sm font-semibold mt-1">{hovered.name}</p>
               <p className="text-xs text-muted-foreground font-mono mt-0.5">{hovered.id}</p>
               <div className="mt-3 space-y-1.5 text-xs">
-                <p><span className="text-muted-foreground">Niveau:</span> {hovered.level}</p>
-                <p><span className="text-muted-foreground">Capacité:</span> {hovered.capacity_available}/{hovered.capacity_max}</p>
-                <p><span className="text-muted-foreground">Attente:</span> {hovered.estimated_wait_minutes} min</p>
-                <p><span className="text-muted-foreground">Spécialités:</span> {hovered.specialities.join(", ") || "—"}</p>
+                <p><span className="text-muted-foreground">{isFr ? "Niveau:" : "Level:"}</span> {hovered.level}</p>
+                <p><span className="text-muted-foreground">{isFr ? "Capacité:" : "Capacity:"}</span> {hovered.capacity_available}/{hovered.capacity_max}</p>
+                <p><span className="text-muted-foreground">{isFr ? "Attente:" : "Wait:"}</span> {hovered.estimated_wait_minutes} min</p>
+                <p><span className="text-muted-foreground">{isFr ? "Spécialités:" : "Specialties:"}</span> {hovered.specialities.join(", ") || "—"}</p>
               </div>
+            </div>
+          )}
+
+          {focusedCentre && (
+            <div className="mt-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 text-xs backdrop-blur-sm md:absolute md:left-4 md:bottom-4 md:mt-0">
+              Focus: <span className="font-semibold">{focusedCentre.name}</span> <span className="text-muted-foreground font-mono">({focusedCentre.id})</span>
             </div>
           )}
         </div>

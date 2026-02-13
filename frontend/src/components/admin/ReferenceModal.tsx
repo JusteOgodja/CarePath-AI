@@ -16,6 +16,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Reference } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 
 const schema = z.object({
   source_id: z.string().min(1, "Source requise"),
@@ -35,6 +36,8 @@ interface Props {
 }
 
 export function ReferenceModal({ open, onOpenChange, reference }: Props) {
+  const { language } = useI18n();
+  const isFr = language === "fr";
   const queryClient = useQueryClient();
   const isEdit = !!reference;
 
@@ -53,10 +56,10 @@ export function ReferenceModal({ open, onOpenChange, reference }: Props) {
     mutationFn: (data: Reference) => (isEdit ? updateReference(data) : createReference(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["references"] });
-      toast.success(isEdit ? "Référence mise à jour" : "Référence créée");
+      toast.success(isEdit ? (isFr ? "Référence mise à jour" : "Route updated") : (isFr ? "Référence créée" : "Route created"));
       onOpenChange(false);
     },
-    onError: () => toast.error("Erreur"),
+    onError: () => toast.error(isFr ? "Erreur" : "Error"),
   });
 
   const onSubmit = (data: FormData) => {
@@ -67,7 +70,7 @@ export function ReferenceModal({ open, onOpenChange, reference }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Modifier la référence" : "Nouvelle référence"}</DialogTitle>
+          <DialogTitle>{isEdit ? (isFr ? "Modifier la référence" : "Edit route") : (isFr ? "Nouvelle référence" : "New route")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <div className="space-y-1">
@@ -107,15 +110,15 @@ export function ReferenceModal({ open, onOpenChange, reference }: Props) {
             {errors.dest_id && <p className="text-xs text-destructive">{errors.dest_id.message}</p>}
           </div>
           <div className="space-y-1">
-            <Label>Temps de trajet (min)</Label>
+            <Label>{isFr ? "Temps de trajet (min)" : "Travel time (min)"}</Label>
             <Input type="number" {...register("travel_minutes")} />
             {errors.travel_minutes && <p className="text-xs text-destructive">{errors.travel_minutes.message}</p>}
           </div>
           <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{isFr ? "Annuler" : "Cancel"}</Button>
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEdit ? "Enregistrer" : "Créer"}
+              {isEdit ? (isFr ? "Enregistrer" : "Save") : (isFr ? "Créer" : "Create")}
             </Button>
           </div>
         </form>

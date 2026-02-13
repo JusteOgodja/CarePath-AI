@@ -6,8 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Activity, RefreshCw, CheckCircle, XCircle, Clock, Globe } from "lucide-react";
 import { motion } from "framer-motion";
+import { useI18n } from "@/lib/i18n";
 
 export function HealthCard() {
+  const { language } = useI18n();
+  const isFr = language === "fr";
   const [latency, setLatency] = React.useState<number | null>(null);
 
   const { data, isLoading, error, refetch, isFetching } = useQuery({
@@ -33,36 +36,36 @@ export function HealthCard() {
             <Activity className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-bold text-[15px]">Statut du système</h3>
-            <p className="text-xs text-muted-foreground">Monitoring temps réel</p>
+            <h3 className="font-bold text-[15px]">{isFr ? "Statut du système" : "System status"}</h3>
+            <p className="text-xs text-muted-foreground">{isFr ? "Monitoring temps réel" : "Real-time monitoring"}</p>
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="shadow-card">
           <RefreshCw className={`h-3.5 w-3.5 mr-2 ${isFetching ? "animate-spin" : ""}`} />
-          Actualiser
+          {isFr ? "Actualiser" : "Refresh"}
         </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl bg-muted/40 border border-border/50 p-4">
-          <p className="stat-label mb-2">Statut</p>
+          <p className="stat-label mb-2">{isFr ? "Statut" : "Status"}</p>
           {isLoading ? (
             <div className="h-7 w-20 bg-muted rounded-md animate-pulse" />
           ) : error ? (
             <div className="flex items-center gap-2">
               <XCircle className="h-4 w-4 text-destructive" />
-              <Badge variant="destructive" className="shadow-none">Hors ligne</Badge>
+              <Badge variant="destructive" className="shadow-none">{isFr ? "Hors ligne" : "Offline"}</Badge>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-success" />
-              <Badge className="bg-success/10 text-success border-success/20 hover:bg-success/15 shadow-none">En ligne</Badge>
+              <Badge className="bg-success/10 text-success border-success/20 hover:bg-success/15 shadow-none">{isFr ? "En ligne" : "Online"}</Badge>
             </div>
           )}
         </div>
 
         <div className="rounded-xl bg-muted/40 border border-border/50 p-4">
-          <p className="stat-label mb-2 flex items-center gap-1.5"><Clock className="h-3 w-3" /> Latence</p>
+          <p className="stat-label mb-2 flex items-center gap-1.5"><Clock className="h-3 w-3" /> {isFr ? "Latence" : "Latency"}</p>
           {latency != null ? (
             <p className="text-2xl font-extrabold">{latency}<span className="text-sm font-normal text-muted-foreground ml-1">ms</span></p>
           ) : (

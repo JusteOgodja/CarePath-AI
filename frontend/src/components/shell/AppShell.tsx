@@ -14,6 +14,8 @@ import {
   ChevronRight,
   Bell,
   LogOut,
+  ClipboardList,
+  Languages,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,18 +23,52 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n";
 
 const navItems = [
-  { label: "Triage", path: "/triage", icon: Stethoscope, description: "Recommandation" },
-  { label: "Réseau", path: "/admin/network", icon: Network, description: "Administration" },
-  { label: "Graphe", path: "/network/graph", icon: Share2, description: "Connexions animées" },
-  { label: "Indicateurs", path: "/indicators", icon: BarChart3, description: "Données santé" },
-  { label: "Système", path: "/system", icon: Settings, description: "Configuration" },
+  {
+    path: "/admin/referrals",
+    icon: ClipboardList,
+    labels: { fr: "Références", en: "Referrals" },
+    descriptions: { fr: "Parcours patient", en: "Patient workflow" },
+  },
+  {
+    path: "/triage",
+    icon: Stethoscope,
+    labels: { fr: "Triage", en: "Triage" },
+    descriptions: { fr: "Recommandation", en: "Recommendation" },
+  },
+  {
+    path: "/admin/network",
+    icon: Network,
+    labels: { fr: "Réseau", en: "Network" },
+    descriptions: { fr: "Administration", en: "Administration" },
+  },
+  {
+    path: "/network/graph",
+    icon: Share2,
+    labels: { fr: "Graphe", en: "Graph" },
+    descriptions: { fr: "Connexions animées", en: "Animated links" },
+  },
+  {
+    path: "/indicators",
+    icon: BarChart3,
+    labels: { fr: "Indicateurs", en: "Indicators" },
+    descriptions: { fr: "Données santé", en: "Health data" },
+  },
+  {
+    path: "/system",
+    icon: Settings,
+    labels: { fr: "Système", en: "System" },
+    descriptions: { fr: "Configuration", en: "Configuration" },
+  },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { isAuthenticated, session, logout } = useAuth();
+  const { language, toggleLanguage } = useI18n();
+  const isFr = language === "fr";
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [dark, setDark] = React.useState(() =>
     typeof window !== "undefined" && document.documentElement.classList.contains("dark")
@@ -56,7 +92,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <div>
             <span className="text-[15px] font-bold text-sidebar-accent-foreground tracking-tight">CarePath AI</span>
-            <p className="text-2xs text-sidebar-foreground">Healthcare Routing</p>
+            <p className="text-2xs text-sidebar-foreground">{isFr ? "Routage santé" : "Healthcare Routing"}</p>
           </div>
         </div>
 
@@ -64,7 +100,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1">
-          <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-sidebar-foreground/50 mb-3">Navigation</p>
+          <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-sidebar-foreground/50 mb-3">{isFr ? "Navigation" : "Navigation"}</p>
           {navItems.map((item) => {
             const active = location.pathname.startsWith(item.path);
             return (
@@ -85,8 +121,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <item.icon className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="block text-[13px]">{item.label}</span>
-                  <span className={cn("block text-2xs", active ? "text-sidebar-foreground" : "text-sidebar-foreground/50")}>{item.description}</span>
+                  <span className="block text-[13px]">{item.labels[language]}</span>
+                  <span className={cn("block text-2xs", active ? "text-sidebar-foreground" : "text-sidebar-foreground/50")}>{item.descriptions[language]}</span>
                 </div>
                 {active && <ChevronRight className="h-3.5 w-3.5 text-primary" />}
               </Link>
@@ -102,8 +138,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="text-2xs font-bold text-sidebar-accent-foreground">D</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-sidebar-accent-foreground truncate">Mode Démo</p>
-                <p className="text-2xs text-sidebar-foreground/50">Aucune authentification</p>
+                <p className="text-xs font-medium text-sidebar-accent-foreground truncate">{isFr ? "Mode Démo" : "Demo mode"}</p>
+                <p className="text-2xs text-sidebar-foreground/50">{isFr ? "Aucune authentification" : "No authentication"}</p>
               </div>
             </div>
           </div>
@@ -156,7 +192,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       )}
                     >
                       <item.icon className="h-4 w-4" />
-                      {item.label}
+                      {item.labels[language]}
                     </Link>
                   );
                 })}
@@ -185,7 +221,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {currentPage && (
               <>
                 <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
-                <span className="font-medium">{currentPage.label}</span>
+                <span className="font-medium">{currentPage.labels[language]}</span>
               </>
             )}
           </div>
@@ -194,7 +230,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <Badge className="hidden sm:flex text-2xs font-medium bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
             <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-primary animate-pulse-soft inline-block" />
-            {isAuthenticated ? `${session?.role} mode` : "Guest mode"}
+            {isAuthenticated ? `${session?.role} ${isFr ? "mode" : "mode"}` : (isFr ? "Mode invité" : "Guest mode")}
           </Badge>
 
           <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
@@ -205,12 +241,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Separator orientation="vertical" className="h-6" />
 
           {isAuthenticated && (
-            <Button variant="ghost" size="icon" onClick={logout} aria-label="Se deconnecter">
+            <Button variant="ghost" size="icon" onClick={logout} aria-label={isFr ? "Se deconnecter" : "Sign out"}>
               <LogOut className="h-4 w-4" />
             </Button>
           )}
 
-          <Button variant="ghost" size="icon" onClick={toggleDark} aria-label="Basculer le thème">
+          <Button variant="outline" size="sm" onClick={toggleLanguage} className="h-8 px-2.5 text-xs gap-1.5">
+            <Languages className="h-3.5 w-3.5" />
+            {isFr ? "EN" : "FR"}
+          </Button>
+
+          <Button variant="ghost" size="icon" onClick={toggleDark} aria-label={isFr ? "Basculer le thème" : "Toggle theme"}>
             {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
         </header>
@@ -236,7 +277,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full bg-primary" />
               )}
               <item.icon className="h-5 w-5" />
-              {item.label}
+              {item.labels[language]}
             </Link>
           );
         })}

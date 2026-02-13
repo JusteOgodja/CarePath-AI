@@ -1,12 +1,16 @@
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin } from "lucide-react";
 import type { PathStep } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 
 export function PathTimeline({ path }: { path: PathStep[] }) {
+  const { language } = useI18n();
+  const isFr = language === "fr";
+
   return (
     <div className="premium-card p-6">
       <p className="stat-label mb-4 flex items-center gap-2">
-        <MapPin className="h-3.5 w-3.5 text-primary" /> Chemin de référence
+        <MapPin className="h-3.5 w-3.5 text-primary" /> {isFr ? "Chemin de référence" : "Referral path"}
       </p>
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
         {path.map((step, i) => (

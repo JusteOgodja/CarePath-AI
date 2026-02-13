@@ -23,6 +23,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Centre } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 
 const schema = z.object({
   id: z.string().trim().min(1, "ID requis").max(50),
@@ -80,6 +81,8 @@ const toFormDefaults = (centre: Centre | null): FormData => {
 };
 
 export function CentreModal({ open, onOpenChange, centre }: Props) {
+  const { language } = useI18n();
+  const isFr = language === "fr";
   const queryClient = useQueryClient();
   const isEdit = !!centre;
 
@@ -104,10 +107,10 @@ export function CentreModal({ open, onOpenChange, centre }: Props) {
     mutationFn: (data: Centre) => (isEdit ? updateCentre(data) : createCentre(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["centres"] });
-      toast.success(isEdit ? "Centre mis à jour" : "Centre créé");
+      toast.success(isEdit ? (isFr ? "Centre mis à jour" : "Center updated") : (isFr ? "Centre créé" : "Center created"));
       onOpenChange(false);
     },
-    onError: () => toast.error("Erreur lors de l'enregistrement"),
+    onError: () => toast.error(isFr ? "Erreur lors de l'enregistrement" : "Error while saving"),
   });
 
   const onSubmit = (data: FormData) => {
@@ -130,7 +133,7 @@ export function CentreModal({ open, onOpenChange, centre }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Modifier le centre" : "Nouveau centre"}</DialogTitle>
+          <DialogTitle>{isEdit ? (isFr ? "Modifier le centre" : "Edit center") : (isFr ? "Nouveau centre" : "New center")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1">
@@ -139,12 +142,12 @@ export function CentreModal({ open, onOpenChange, centre }: Props) {
             {errors.id && <p className="text-xs text-destructive">{errors.id.message}</p>}
           </div>
           <div className="space-y-1">
-            <Label>Nom</Label>
+            <Label>{isFr ? "Nom" : "Name"}</Label>
             <Input {...register("name")} />
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
           </div>
           <div className="space-y-1">
-            <Label>Niveau</Label>
+            <Label>{isFr ? "Niveau" : "Level"}</Label>
             <Controller
               name="level"
               control={control}
@@ -161,24 +164,24 @@ export function CentreModal({ open, onOpenChange, centre }: Props) {
             />
           </div>
           <div className="space-y-1">
-            <Label>Spécialités (virgules)</Label>
+            <Label>{isFr ? "Spécialités (virgules)" : "Specialties (comma-separated)"}</Label>
             <Input {...register("specialities_input")} placeholder="maternal, pediatric" />
           </div>
           <div className="space-y-1">
-            <Label>Capacité max</Label>
+            <Label>{isFr ? "Capacité max" : "Max capacity"}</Label>
             <Input type="number" {...register("capacity_max")} />
             {errors.capacity_max && <p className="text-xs text-destructive">{errors.capacity_max.message}</p>}
           </div>
           <div className="space-y-1">
-            <Label>Capacité disponible</Label>
+            <Label>{isFr ? "Capacité disponible" : "Available capacity"}</Label>
             <Input type="number" {...register("capacity_available")} />
           </div>
           <div className="space-y-1">
-            <Label>Attente (min)</Label>
+            <Label>{isFr ? "Attente (min)" : "Wait (min)"}</Label>
             <Input type="number" {...register("estimated_wait_minutes")} />
           </div>
           <div className="space-y-1">
-            <Label>Population</Label>
+            <Label>{isFr ? "Population" : "Population"}</Label>
             <Input type="number" {...register("catchment_population")} />
           </div>
           <div className="space-y-1">
@@ -193,11 +196,11 @@ export function CentreModal({ open, onOpenChange, centre }: Props) {
           </div>
           <div className="sm:col-span-2 flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Annuler
+              {isFr ? "Annuler" : "Cancel"}
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEdit ? "Enregistrer" : "Créer"}
+              {isEdit ? (isFr ? "Enregistrer" : "Save") : (isFr ? "Créer" : "Create")}
             </Button>
           </div>
         </form>

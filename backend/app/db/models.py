@@ -1,4 +1,6 @@
-from sqlalchemy import ForeignKey, Integer, String, Text, UniqueConstraint, create_engine
+from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from app.core.config import get_database_url
@@ -39,6 +41,27 @@ class ReferenceModel(Base):
     source_id: Mapped[str] = mapped_column(ForeignKey("centres.id"), nullable=False)
     dest_id: Mapped[str] = mapped_column(ForeignKey("centres.id"), nullable=False)
     travel_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class ReferralRequestModel(Base):
+    __tablename__ = "referral_requests"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    patient_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    source_id: Mapped[str] = mapped_column(ForeignKey("centres.id"), nullable=False)
+    needed_speciality: Mapped[str] = mapped_column(String(32), nullable=False)
+    severity: Mapped[str] = mapped_column(String(16), nullable=False)
+    proposed_dest_id: Mapped[str | None] = mapped_column(ForeignKey("centres.id"), nullable=True)
+    accepted_dest_id: Mapped[str | None] = mapped_column(ForeignKey("centres.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    feedback_diagnosis: Mapped[str | None] = mapped_column(Text, nullable=True)
+    feedback_treatment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    feedback_followup: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class PatientModel(Base):

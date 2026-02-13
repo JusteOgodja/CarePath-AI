@@ -5,14 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const { language } = useI18n();
+  const isFr = language === "fr";
 
-  const [username, setUsername] = React.useState("admin");
-  const [password, setPassword] = React.useState("admin123");
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -26,7 +29,7 @@ export default function LoginPage() {
       await login(username, password);
       navigate(from, { replace: true });
     } catch {
-      setError("Identifiants invalides");
+      setError(isFr ? "Identifiants invalides" : "Invalid credentials");
     } finally {
       setLoading(false);
     }
@@ -40,8 +43,8 @@ export default function LoginPage() {
             <ShieldCheck className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold">Connexion Admin</h1>
-            <p className="text-xs text-muted-foreground">Accès protégé aux opérations d'administration</p>
+            <h1 className="text-lg font-semibold">{isFr ? "Connexion Admin" : "Admin Login"}</h1>
+            <p className="text-xs text-muted-foreground">{isFr ? "Accès protégé aux opérations d'administration" : "Protected access to administration operations"}</p>
           </div>
         </div>
 
@@ -59,7 +62,7 @@ export default function LoginPage() {
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Connexion..." : "Se connecter"}
+            {loading ? (isFr ? "Connexion..." : "Signing in...") : (isFr ? "Se connecter" : "Sign in")}
           </Button>
         </form>
       </div>

@@ -30,6 +30,7 @@ import { CentreModal } from "./CentreModal";
 import { ApiClientError } from "@/lib/api/client";
 import { toast } from "sonner";
 import type { Centre } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 
 const levelColors: Record<string, string> = {
   primary: "bg-level-primary/10 text-level-primary border-level-primary/20",
@@ -38,6 +39,8 @@ const levelColors: Record<string, string> = {
 };
 
 export function CentresTable() {
+  const { language } = useI18n();
+  const isFr = language === "fr";
   const queryClient = useQueryClient();
   const [search, setSearch] = React.useState("");
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -53,14 +56,14 @@ export function CentresTable() {
     mutationFn: deleteCentre,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["centres"] });
-      toast.success("Centre supprimé");
+      toast.success(isFr ? "Centre supprimé" : "Center deleted");
       setDeleteId(null);
     },
     onError: (err) => {
       if (err instanceof ApiClientError && err.status === 409) {
-        toast.error("Ce centre est référencé. Supprimez d'abord les références associées.");
+        toast.error(isFr ? "Ce centre est référencé. Supprimez d'abord les références associées." : "This center is referenced. Delete related routes first.");
       } else {
-        toast.error("Erreur lors de la suppression");
+        toast.error(isFr ? "Erreur lors de la suppression" : "Error while deleting");
       }
       setDeleteId(null);
     },
@@ -74,7 +77,7 @@ export function CentresTable() {
   );
 
   if (isLoading) return <TableSkeleton cols={5} />;
-  if (error) return <ErrorState message="Impossible de charger les centres" onRetry={() => refetch()} />;
+  if (error) return <ErrorState message={isFr ? "Impossible de charger les centres" : "Unable to load centers"} onRetry={() => refetch()} />;
 
   return (
     <div className="space-y-5">
@@ -83,29 +86,30 @@ export function CentresTable() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Rechercher un centre..."
+            
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 h-11"
           />
         </div>
         <Button onClick={() => { setEditCentre(null); setModalOpen(true); }} className="h-11 shadow-card" style={{ background: "var(--gradient-primary)" }}>
-          <Plus className="mr-2 h-4 w-4" /> Ajouter un centre
+          <Plus className="mr-2 h-4 w-4" /> {isFr ? "Ajouter un centre" : "Add center"}
         </Button>
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState title="Aucun centre trouvé" description="Ajoutez un centre pour commencer à construire votre réseau" />
+        <EmptyState title={isFr ? "Aucun centre trouvé" : "No center found"} description={isFr ? "Ajoutez un centre pour commencer à construire votre réseau" : "Add a center to start building your network"} />
       ) : (
         <div className="premium-card overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30">
                 <TableHead className="text-2xs uppercase tracking-wider font-semibold">ID</TableHead>
-                <TableHead className="text-2xs uppercase tracking-wider font-semibold">Nom</TableHead>
-                <TableHead className="text-2xs uppercase tracking-wider font-semibold">Niveau</TableHead>
-                <TableHead className="text-2xs uppercase tracking-wider font-semibold">Spécialités</TableHead>
-                <TableHead className="text-2xs uppercase tracking-wider font-semibold">Capacité</TableHead>
-                <TableHead className="w-24 text-2xs uppercase tracking-wider font-semibold">Actions</TableHead>
+                <TableHead className="text-2xs uppercase tracking-wider font-semibold">{isFr ? "Nom" : "Name"}</TableHead>
+                <TableHead className="text-2xs uppercase tracking-wider font-semibold">{isFr ? "Niveau" : "Level"}</TableHead>
+                <TableHead className="text-2xs uppercase tracking-wider font-semibold">{isFr ? "Spécialités" : "Specialties"}</TableHead>
+                <TableHead className="text-2xs uppercase tracking-wider font-semibold">{isFr ? "Capacité" : "Capacity"}</TableHead>
+                <TableHead className="w-24 text-2xs uppercase tracking-wider font-semibold">{isFr ? "Actions" : "Actions"}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -153,16 +157,16 @@ export function CentresTable() {
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer ce centre ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. Le centre sera définitivement supprimé du réseau.
+              {isFr ? "Cette action est irréversible. Le centre sera définitivement supprimé du réseau." : "This action is irreversible. The center will be permanently deleted from the network."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{isFr ? "Annuler" : "Cancel"}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteId && delMutation.mutate(deleteId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Supprimer
+              {isFr ? "Supprimer" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

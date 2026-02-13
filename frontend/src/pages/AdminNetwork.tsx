@@ -3,8 +3,12 @@ import { CentresTable } from "@/components/admin/CentresTable";
 import { ReferencesTable } from "@/components/admin/ReferencesTable";
 import { Building2, GitBranch, Network } from "lucide-react";
 import { motion } from "framer-motion";
+import { useI18n } from "@/lib/i18n";
 
 export default function AdminNetworkPage() {
+  const { language } = useI18n();
+  const isFr = language === "fr";
+
   return (
     <div className="space-y-8 pb-20 lg:pb-0">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="page-header">
@@ -13,8 +17,8 @@ export default function AdminNetworkPage() {
             <Network className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1>Administration du réseau</h1>
-            <p>Gérez les centres de santé et leurs connexions</p>
+            <h1>{isFr ? "Administration du réseau" : "Network Administration"}</h1>
+            <p>{isFr ? "Gérez les centres de santé et leurs connexions" : "Manage health centers and their links"}</p>
           </div>
         </div>
       </motion.div>
@@ -22,10 +26,10 @@ export default function AdminNetworkPage() {
       <Tabs defaultValue="centres">
         <TabsList className="bg-muted/60 p-1">
           <TabsTrigger value="centres" className="gap-2 data-[state=active]:shadow-sm">
-            <Building2 className="h-4 w-4" /> Centres
+            <Building2 className="h-4 w-4" /> {isFr ? "Centres" : "Centers"}
           </TabsTrigger>
           <TabsTrigger value="references" className="gap-2 data-[state=active]:shadow-sm">
-            <GitBranch className="h-4 w-4" /> Références
+            <GitBranch className="h-4 w-4" /> {isFr ? "Références" : "Referrals routes"}
           </TabsTrigger>
         </TabsList>
 

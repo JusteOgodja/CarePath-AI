@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class RecommandationRequest(BaseModel):
@@ -8,6 +9,7 @@ class RecommandationRequest(BaseModel):
     current_centre_id: str = Field(..., examples=["C_LOCAL_A"])
     needed_speciality: Literal["maternal", "pediatric", "general"]
     severity: Literal["low", "medium", "high"] = "medium"
+    routing_policy: Literal["auto", "heuristic", "rl"] = "heuristic"
 
 
 class PathStep(BaseModel):
@@ -38,6 +40,8 @@ class RecommandationResponse(BaseModel):
     explanation: str
     rationale: str
     score_breakdown: ScoreBreakdown
+    policy_used: Literal["heuristic", "rl"] = "heuristic"
+    fallback_reason: str | None = None
 
 
 class CentreCreate(BaseModel):
@@ -52,6 +56,12 @@ class CentreCreate(BaseModel):
     lon: float | None = Field(None, ge=-180, le=180, examples=[36.817223])
     catchment_population: int = Field(0, ge=0, examples=[12000])
 
+    @model_validator(mode="after")
+    def validate_capacity_consistency(self):
+        if self.capacity_available > self.capacity_max:
+            raise ValueError("capacity_available cannot exceed capacity_max")
+        return self
+
 
 class CentreUpdate(BaseModel):
     name: str = Field(..., examples=["Hopital District 2"])
@@ -63,6 +73,12 @@ class CentreUpdate(BaseModel):
     lat: float | None = Field(None, ge=-90, le=90, examples=[-1.286389])
     lon: float | None = Field(None, ge=-180, le=180, examples=[36.817223])
     catchment_population: int = Field(0, ge=0, examples=[12000])
+
+    @model_validator(mode="after")
+    def validate_capacity_consistency(self):
+        if self.capacity_available > self.capacity_max:
+            raise ValueError("capacity_available cannot exceed capacity_max")
+        return self
 
 
 class CentreResponse(BaseModel):
@@ -116,3 +132,50 @@ class LoginResponse(BaseModel):
     token_type: Literal["bearer"] = "bearer"
     role: Literal["admin", "viewer"]
     username: str
+
+
+ReferralStatus = Literal["pending", "accepted", "in_transit", "completed", "rejected", "cancelled"]
+
+
+class ReferralRequestCreate(BaseModel):
+    patient_id: str = Field(..., min_length=1, max_length=64)
+    source_id: str = Field(..., min_length=1, max_length=64)
+    needed_speciality: Literal["maternal", "pediatric", "general"]
+    severity: Literal["low", "medium", "high"] = "medium"
+    proposed_dest_id: str | None = Field(None, max_length=64)
+    notes: str | None = None
+
+
+class ReferralAcceptRequest(BaseModel):
+    accepted_dest_id: str = Field(..., min_length=1, max_length=64)
+    notes: str | None = None
+
+
+class ReferralTransitionRequest(BaseModel):
+    notes: str | None = None
+
+
+class ReferralCompleteRequest(BaseModel):
+    diagnosis: str | None = None
+    treatment: str | None = None
+    followup: str | None = None
+    notes: str | None = None
+
+
+class ReferralRequestResponse(BaseModel):
+    id: int
+    patient_id: str
+    source_id: str
+    needed_speciality: str
+    severity: str
+    proposed_dest_id: str | None
+    accepted_dest_id: str | None
+    status: ReferralStatus
+    notes: str | None
+    feedback_diagnosis: str | None
+    feedback_treatment: str | None
+    feedback_followup: str | None
+    created_by: str | None
+    created_at: datetime
+    updated_at: datetime
+    closed_at: datetime | None

@@ -7,6 +7,8 @@ import type {
   RecommandationResponse,
   CountryIndicator,
   HealthResponse,
+  ReferralRequest,
+  ReferralCreatePayload,
 } from "@/lib/types";
 import { centreFromRaw, centreToRaw } from "@/lib/mappers/centres";
 
@@ -70,3 +72,46 @@ export const listIndicators = (params: { country_code?: string; indicator_code?:
   const qs = searchParams.toString();
   return apiFetch<CountryIndicator[]>(`/indicators${qs ? `?${qs}` : ""}`);
 };
+
+
+// Referral workflow
+export const listReferralRequests = (params?: { status_filter?: string; source_id?: string }) => {
+  const searchParams = new URLSearchParams();
+  if (params?.status_filter) searchParams.set("status_filter", params.status_filter);
+  if (params?.source_id) searchParams.set("source_id", params.source_id);
+  const qs = searchParams.toString();
+  return apiFetch<ReferralRequest[]>(`/referrals/requests${qs ? `?${qs}` : ""}`);
+};
+
+export const createReferralRequest = (payload: ReferralCreatePayload) =>
+  apiFetch<ReferralRequest>("/referrals/requests", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const acceptReferralRequest = (requestId: number, accepted_dest_id: string, notes?: string) =>
+  apiFetch<ReferralRequest>(`/referrals/requests/${requestId}/accept`, {
+    method: "POST",
+    body: JSON.stringify({ accepted_dest_id, notes }),
+  });
+
+export const startReferralTransfer = (requestId: number, notes?: string) =>
+  apiFetch<ReferralRequest>(`/referrals/requests/${requestId}/start-transfer`, {
+    method: "POST",
+    body: JSON.stringify({ notes }),
+  });
+
+export const completeReferralRequest = (
+  requestId: number,
+  payload: { diagnosis?: string; treatment?: string; followup?: string; notes?: string }
+) =>
+  apiFetch<ReferralRequest>(`/referrals/requests/${requestId}/complete`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const rejectReferralRequest = (requestId: number, notes?: string) =>
+  apiFetch<ReferralRequest>(`/referrals/requests/${requestId}/reject`, {
+    method: "POST",
+    body: JSON.stringify({ notes }),
+  });

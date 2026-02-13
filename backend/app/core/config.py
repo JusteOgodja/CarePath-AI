@@ -67,6 +67,18 @@ def get_viewer_credentials() -> tuple[str, str]:
     return username, password
 
 
+def get_recommendation_policy_default() -> str:
+    return os.getenv("RECOMMENDATION_POLICY_DEFAULT", "auto").strip().lower()
+
+
+def get_rl_model_path() -> str:
+    value = os.getenv("RL_MODEL_PATH", "").strip()
+    if value:
+        return value
+    default_model = Path(__file__).resolve().parents[2] / "models" / "ppo_referral.zip"
+    return str(default_model)
+
+
 def validate_runtime_config() -> None:
     env = get_app_env()
     if env not in {"production", "prod"}:

@@ -2,8 +2,12 @@ import { HealthCard } from "@/components/system/HealthCard";
 import { Badge } from "@/components/ui/badge";
 import { Settings, Info } from "lucide-react";
 import { motion } from "framer-motion";
+import { useI18n } from "@/lib/i18n";
 
 export default function SystemPage() {
+  const { language } = useI18n();
+  const isFr = language === "fr";
+
   return (
     <div className="space-y-8 pb-20 lg:pb-0">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="page-header">
@@ -12,8 +16,8 @@ export default function SystemPage() {
             <Settings className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1>Système</h1>
-            <p>Statut, configuration et informations</p>
+            <h1>{isFr ? "Système" : "System"}</h1>
+            <p>{isFr ? "Statut, configuration et informations" : "Status, configuration and information"}</p>
           </div>
         </div>
       </motion.div>
@@ -31,15 +35,17 @@ export default function SystemPage() {
             <Info className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-[15px]">À propos</h3>
+            <h3 className="font-semibold text-[15px]">{isFr ? "À propos" : "About"}</h3>
             <p className="text-xs text-muted-foreground">CarePath AI Frontend</p>
           </div>
         </div>
 
         <div className="space-y-3 text-sm leading-relaxed">
           <p className="text-muted-foreground">
-            <strong className="text-foreground">CarePath AI</strong> est un système d'aide à la décision pour le triage et le transfert de patients dans les réseaux de santé.
-            Il recommande le meilleur centre de référence en fonction de la spécialité requise, de la sévérité, de la capacité et du temps de trajet.
+            <strong className="text-foreground">CarePath AI</strong>{" "}
+            {isFr
+              ? "est un système d'aide à la décision pour le triage et le transfert de patients dans les réseaux de santé. Il recommande le meilleur centre de référence en fonction de la spécialité requise, de la sévérité, de la capacité et du temps de trajet."
+              : "is a decision-support system for patient triage and transfers in healthcare networks. It recommends the best referral center based on required specialty, severity, capacity and travel time."}
           </p>
           <div className="flex gap-2 flex-wrap">
             <Badge variant="outline" className="text-2xs">React + Vite</Badge>

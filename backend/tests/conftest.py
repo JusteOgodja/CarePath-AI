@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path:
 os.environ.setdefault("DATABASE_URL", "sqlite:///./test_carepath.db")
 
 from app.db.migrations import run_migrations
-from app.db.models import CountryIndicatorModel, CentreModel, ReferenceModel, get_session, init_db
+from app.db.models import CountryIndicatorModel, CentreModel, ReferenceModel, ReferralRequestModel, get_session, init_db
 from app.core.rate_limit import reset_rate_limits
 
 
@@ -73,12 +73,14 @@ def clean_db() -> None:
     reset_rate_limits()
     with get_session() as session:
         session.query(CountryIndicatorModel).delete()
+        session.query(ReferralRequestModel).delete()
         session.query(ReferenceModel).delete()
         session.query(CentreModel).delete()
         session.commit()
     yield
     with get_session() as session:
         session.query(CountryIndicatorModel).delete()
+        session.query(ReferralRequestModel).delete()
         session.query(ReferenceModel).delete()
         session.query(CentreModel).delete()
         session.commit()

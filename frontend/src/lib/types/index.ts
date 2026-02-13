@@ -39,10 +39,7 @@ export interface RecommandationRequest {
   current_centre_id: string;
   needed_speciality: "maternal" | "pediatric" | "general";
   severity: "low" | "medium" | "high";
-}
-
-export interface ScoreBreakdown {
-  [key: string]: number | string;
+  routing_policy?: "heuristic" | "auto" | "rl";
 }
 
 export interface RecommandationResponse {
@@ -56,6 +53,8 @@ export interface RecommandationResponse {
   explanation: string;
   rationale: string;
   score_breakdown: ScoreBreakdown;
+  policy_used?: "heuristic" | "rl";
+  fallback_reason?: string | null;
 }
 
 export interface PathStep {
@@ -89,6 +88,9 @@ export interface CountryIndicator {
 // === Health ===
 export interface HealthResponse {
   status: string;
+  database?: string;
+  schema_revision?: string | null;
+  time_utc?: string;
 }
 
 // === API Error ===
@@ -96,4 +98,35 @@ export interface ApiError {
   status: number;
   message: string;
   details?: unknown;
+}
+
+
+export type ReferralStatus = "pending" | "accepted" | "in_transit" | "completed" | "rejected" | "cancelled";
+
+export interface ReferralRequest {
+  id: number;
+  patient_id: string;
+  source_id: string;
+  needed_speciality: "maternal" | "pediatric" | "general";
+  severity: "low" | "medium" | "high";
+  proposed_dest_id?: string | null;
+  accepted_dest_id?: string | null;
+  status: ReferralStatus;
+  notes?: string | null;
+  feedback_diagnosis?: string | null;
+  feedback_treatment?: string | null;
+  feedback_followup?: string | null;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+  closed_at?: string | null;
+}
+
+export interface ReferralCreatePayload {
+  patient_id: string;
+  source_id: string;
+  needed_speciality: "maternal" | "pediatric" | "general";
+  severity: "low" | "medium" | "high";
+  proposed_dest_id?: string;
+  notes?: string;
 }

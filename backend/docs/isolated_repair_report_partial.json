@@ -5,11 +5,11 @@
     "pediatric",
     "general"
   ],
-  "isolated_centres_before": 9,
+  "isolated_centres_before": 0,
   "created_edges": 0,
-  "skipped_edges": 9,
+  "skipped_edges": 0,
   "targets_per_centre": 2,
   "sample_repairs": [],
-  "graph_nodes": 1107,
+  "graph_nodes": 1098,
   "graph_edges": 8598
 }

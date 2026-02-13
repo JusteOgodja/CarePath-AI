@@ -20,6 +20,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useI18n } from "@/lib/i18n";
 
 const countries = [
   { code: "KEN", label: "Kenya" },
@@ -30,6 +31,8 @@ const countries = [
 ];
 
 export function IndicatorsDashboard() {
+  const { language } = useI18n();
+  const isFr = language === "fr";
   const [country, setCountry] = React.useState("KEN");
   const [indicatorCode, setIndicatorCode] = React.useState("");
   const debouncedCode = useDebounce(indicatorCode, 400);
@@ -47,7 +50,7 @@ export function IndicatorsDashboard() {
 
   const handleCopyJson = async (data: unknown) => {
     await navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-    toast.success("JSON copié");
+    toast.success(isFr ? "JSON copié" : "JSON copied");
   };
 
   const handleCsv = (data: object[]) => {
@@ -94,10 +97,10 @@ export function IndicatorsDashboard() {
       <Tabs defaultValue="latest">
         <TabsList className="bg-muted/60 p-1">
           <TabsTrigger value="latest" className="data-[state=active]:shadow-sm gap-2">
-            <TrendingUp className="h-3.5 w-3.5" /> Dernières valeurs
+            <TrendingUp className="h-3.5 w-3.5" /> {isFr ? "Dernières valeurs" : "Latest values"}
           </TabsTrigger>
           <TabsTrigger value="explore" className="data-[state=active]:shadow-sm gap-2">
-            <Search className="h-3.5 w-3.5" /> Explorer
+            <Search className="h-3.5 w-3.5" /> {isFr ? "Explorer" : "Explore"}
           </TabsTrigger>
         </TabsList>
 
@@ -107,8 +110,8 @@ export function IndicatorsDashboard() {
               {[1, 2, 3, 4, 5, 6].map((i) => <CardSkeleton key={i} />)}
             </div>
           )}
-          {latestQuery.error && <ErrorState message="Impossible de charger les indicateurs" onRetry={() => latestQuery.refetch()} />}
-          {latestQuery.data && latestQuery.data.length === 0 && <EmptyState title="Aucun indicateur" />}
+          {latestQuery.error && <ErrorState message={isFr ? "Impossible de charger les indicateurs" : "Unable to load indicators"} onRetry={() => latestQuery.refetch()} />}
+          {latestQuery.data && latestQuery.data.length === 0 && <EmptyState title={isFr ? "Aucun indicateur" : "No indicators"} />}
           {latestQuery.data && latestQuery.data.length > 0 && (
             <>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -134,7 +137,7 @@ export function IndicatorsDashboard() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => handleCopyJson(latestQuery.data)} className="shadow-card">
-                  <Copy className="mr-2 h-3.5 w-3.5" /> Copier JSON
+                  <Copy className="mr-2 h-3.5 w-3.5" /> {isFr ? "Copier JSON" : "Copy JSON"}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => handleCsv(latestQuery.data as unknown as object[])} className="shadow-card">
                   <Download className="mr-2 h-3.5 w-3.5" /> CSV
@@ -147,7 +150,7 @@ export function IndicatorsDashboard() {
         <TabsContent value="explore" className="space-y-5 mt-6">
           <div className="premium-card p-5 flex gap-4 flex-wrap items-end">
             <div className="space-y-1.5 flex-1 max-w-sm">
-              <Label className="stat-label">Code indicateur</Label>
+              <Label className="stat-label">{isFr ? "Code indicateur" : "Indicator code"}</Label>
               <Input placeholder="ex: SH.XPD.CHEX.GD.ZS" value={indicatorCode} onChange={(e) => setIndicatorCode(e.target.value)} className="h-11" />
             </div>
           </div>
@@ -155,7 +158,7 @@ export function IndicatorsDashboard() {
           {chartData.length >= 2 && (
             <div className="premium-card p-6">
               <h3 className="stat-label mb-5 flex items-center gap-2">
-                <BarChart3 className="h-3.5 w-3.5 text-primary" /> Évolution temporelle
+                <BarChart3 className="h-3.5 w-3.5 text-primary" /> {isFr ? "Évolution temporelle" : "Time evolution"}
               </h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
@@ -177,8 +180,8 @@ export function IndicatorsDashboard() {
           )}
 
           {exploreQuery.isLoading && <TableSkeleton cols={4} />}
-          {exploreQuery.error && <ErrorState message="Erreur lors de l'exploration" onRetry={() => exploreQuery.refetch()} />}
-          {exploreQuery.data && exploreQuery.data.length === 0 && <EmptyState title="Aucun résultat" />}
+          {exploreQuery.error && <ErrorState message={isFr ? "Erreur lors de l'exploration" : "Error during exploration"} onRetry={() => exploreQuery.refetch()} />}
+          {exploreQuery.data && exploreQuery.data.length === 0 && <EmptyState title={isFr ? "Aucun résultat" : "No result"} />}
           {exploreQuery.data && exploreQuery.data.length > 0 && (
             <>
               <div className="premium-card overflow-hidden">
@@ -186,9 +189,9 @@ export function IndicatorsDashboard() {
                   <TableHeader>
                     <TableRow className="bg-muted/30">
                       <TableHead className="text-2xs uppercase tracking-wider font-semibold">Code</TableHead>
-                      <TableHead className="text-2xs uppercase tracking-wider font-semibold">Nom</TableHead>
-                      <TableHead className="text-2xs uppercase tracking-wider font-semibold">Année</TableHead>
-                      <TableHead className="text-2xs uppercase tracking-wider font-semibold">Valeur</TableHead>
+                      <TableHead className="text-2xs uppercase tracking-wider font-semibold">{isFr ? "Nom" : "Name"}</TableHead>
+                      <TableHead className="text-2xs uppercase tracking-wider font-semibold">{isFr ? "Année" : "Year"}</TableHead>
+                      <TableHead className="text-2xs uppercase tracking-wider font-semibold">{isFr ? "Valeur" : "Value"}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -205,7 +208,7 @@ export function IndicatorsDashboard() {
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => handleCopyJson(exploreQuery.data)} className="shadow-card">
-                  <Copy className="mr-2 h-3.5 w-3.5" /> Copier JSON
+                  <Copy className="mr-2 h-3.5 w-3.5" /> {isFr ? "Copier JSON" : "Copy JSON"}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => handleCsv(exploreQuery.data as unknown as object[])} className="shadow-card">
                   <Download className="mr-2 h-3.5 w-3.5" /> CSV

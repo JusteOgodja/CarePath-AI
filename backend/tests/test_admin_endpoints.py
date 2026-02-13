@@ -102,3 +102,44 @@ def test_reference_crud_flow(client: TestClient) -> None:
     listed_after = client.get("/references")
     assert listed_after.status_code == 200
     assert all(item["id"] != created_id for item in listed_after.json())
+
+def test_create_centre_invalid_capacity_returns_422(client: TestClient) -> None:
+    payload = {
+        "id": "H_INVALID_CAP",
+        "name": "Hopital Invalid",
+        "level": "secondary",
+        "specialities": ["general"],
+        "capacity_max": 3,
+        "capacity_available": 5,
+        "estimated_wait_minutes": 25,
+    }
+    response = client.post("/centres", json=payload)
+    assert response.status_code == 422
+
+
+def test_update_centre_invalid_capacity_returns_422(client: TestClient) -> None:
+    payload = {
+        "id": "H_VALID_CAP",
+        "name": "Hopital Valid",
+        "level": "secondary",
+        "specialities": ["general"],
+        "capacity_max": 8,
+        "capacity_available": 4,
+        "estimated_wait_minutes": 25,
+    }
+    created = client.post("/centres", json=payload)
+    assert created.status_code == 201
+
+    update = client.put(
+        "/centres/H_VALID_CAP",
+        json={
+            "name": "Hopital Valid",
+            "level": "secondary",
+            "specialities": ["general"],
+            "capacity_max": 2,
+            "capacity_available": 6,
+            "estimated_wait_minutes": 25,
+        },
+    )
+    assert update.status_code == 422
+
