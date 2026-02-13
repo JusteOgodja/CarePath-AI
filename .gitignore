@@ -5,6 +5,11 @@ __pycache__/
 *.pyd
 .venv/
 venv/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # Models and runtime
 models/*.zip
@@ -20,3 +25,13 @@ models/*.pt
 Thumbs.db
 
 .env
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Frontend build outputs
+frontend/dist/
+
+# Large local data
+data/
+backend/docs/*.json

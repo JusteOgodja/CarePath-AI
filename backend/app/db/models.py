@@ -1,7 +1,8 @@
-from sqlalchemy import ForeignKey, Integer, String, Text, UniqueConstraint, create_engine, text
+from sqlalchemy import ForeignKey, Integer, String, Text, UniqueConstraint, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from app.core.config import get_database_url
+from app.db.migrations import run_migrations
 
 DATABASE_URL = get_database_url()
 
@@ -88,38 +89,9 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, futu
 
 
 def init_db() -> None:
-    Base.metadata.create_all(engine)
-    _ensure_sqlite_schema_updates()
-
-
-def _ensure_sqlite_schema_updates() -> None:
-    if not DATABASE_URL.startswith("sqlite"):
-        return
-
-    required_columns = {
-        "lat": "REAL",
-        "lon": "REAL",
-        "osm_type": "TEXT",
-        "osm_id": "TEXT",
-        "raw_tags_json": "TEXT",
-        "capacity_max": "INTEGER NOT NULL DEFAULT 10",
-        "catchment_population": "INTEGER DEFAULT 0",
-    }
-
-    with engine.begin() as conn:
-        rows = conn.execute(text("PRAGMA table_info(centres)")).fetchall()
-        existing = {row[1] for row in rows}
-
-        for col, sql_type in required_columns.items():
-            if col not in existing:
-                conn.execute(text(f"ALTER TABLE centres ADD COLUMN {col} {sql_type}"))
-
-        conn.execute(
-            text(
-                "CREATE UNIQUE INDEX IF NOT EXISTS idx_centres_osm_identity "
-                "ON centres(osm_type, osm_id)"
-            )
-        )
+    if not run_migrations():
+        # Fallback for environments where Alembic is not installed yet.
+        Base.metadata.create_all(engine)
 
 
 def get_session() -> Session:

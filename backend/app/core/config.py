@@ -10,6 +10,10 @@ def get_database_url() -> str:
     return f"sqlite:///{default_db.as_posix()}"
 
 
+def get_app_env() -> str:
+    return os.getenv("APP_ENV", "development").strip().lower()
+
+
 def get_healthsites_api_key() -> str:
     key = os.getenv("HEALTHSITES_API_KEY", "").strip()
     if not key:
@@ -36,3 +40,46 @@ def get_cors_allow_origins() -> list[str]:
         "http://localhost:4173",
         "http://127.0.0.1:4173",
     ]
+
+
+def get_auth_secret_key() -> str:
+    return os.getenv("AUTH_SECRET_KEY", "change-this-in-production")
+
+
+def get_token_expire_seconds() -> int:
+    raw = os.getenv("AUTH_TOKEN_EXPIRE_SECONDS", "28800").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        value = 28800
+    return max(300, value)
+
+
+def get_admin_credentials() -> tuple[str, str]:
+    username = os.getenv("ADMIN_USERNAME", "admin").strip()
+    password = os.getenv("ADMIN_PASSWORD", "admin123").strip()
+    return username, password
+
+
+def get_viewer_credentials() -> tuple[str, str]:
+    username = os.getenv("VIEWER_USERNAME", "viewer").strip()
+    password = os.getenv("VIEWER_PASSWORD", "viewer123").strip()
+    return username, password
+
+
+def validate_runtime_config() -> None:
+    env = get_app_env()
+    if env not in {"production", "prod"}:
+        return
+
+    if get_auth_secret_key() == "change-this-in-production":
+        raise ValueError("AUTH_SECRET_KEY must be set to a strong secret in production")
+
+    admin_user, admin_pass = get_admin_credentials()
+    viewer_user, viewer_pass = get_viewer_credentials()
+    weak_defaults = {
+        ("admin", "admin123"),
+        ("viewer", "viewer123"),
+    }
+    if (admin_user, admin_pass) in weak_defaults or (viewer_user, viewer_pass) in weak_defaults:
+        raise ValueError("Default credentials are not allowed in production")

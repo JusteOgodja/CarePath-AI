@@ -5,7 +5,7 @@ Prototype local (100% gratuit) pour l'optimisation des parcours de reference pat
 - Graphe de soins (NetworkX)
 - Simulation de scenarios + KPI equite (entropy_norm, HHI)
 - Comparaison PPO vs Heuristic vs Random
-- Frontend Streamlit de demo live
+- Frontend React/Vite dans `frontend`
 
 ## Installation
 
@@ -16,8 +16,21 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
+Installation minimale API (sans stack RL/data):
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements/base.txt -r requirements/dev.txt
+```
+
 Config locale (`.env.example`):
 - `DATABASE_URL` (defaut: `sqlite:///./carepath.db`)
+- `APP_ENV` (`development`/`production`)
+- `AUTH_SECRET_KEY` (signature des tokens)
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD` (RBAC admin)
+- `VIEWER_USERNAME` / `VIEWER_PASSWORD` (lecture seule)
 
 ## API Backend
 
@@ -28,47 +41,48 @@ python scripts/seed_demo_data.py
 uvicorn app.main:app --reload
 ```
 
+Migrations (Alembic):
+
+```bash
+cd backend
+python scripts/migrate.py
+```
+
 Docs API: `http://127.0.0.1:8000/docs`
 
 ### Endpoint metier
-- `POST /recommander`
+- `POST /api/v1/auth/login` (retourne un token bearer)
+- `POST /api/v1/recommander`
   - utilise `severity` dans le score
   - renvoie `rationale` + `score_breakdown`
-- `GET /indicators?country_code=KEN`
-- `GET /indicators/latest?country_code=KEN`
+- `GET /api/v1/health` (status + database + schema revision + time)
+- `GET /api/v1/indicators?country_code=KEN`
+- `GET /api/v1/indicators/latest?country_code=KEN`
+- `POST/PUT/DELETE /api/v1/centres` et `/api/v1/references` (role `admin` requis)
 
-## Streamlit Demo UI
+Observabilité/robustesse runtime:
+- `X-Request-ID` injecté sur chaque réponse
+- logs backend structurés JSON (requêtes + erreurs)
+- payload d’erreur standardisé (`detail` + `error{code,message,request_id,...}`)
+- rate limit mémoire:
+  - `/api/v1/auth/login`: 10 req / 60s / IP
+  - écritures admin: 60 req / 60s / IP
+
+## Frontend React (frontend)
 
 Depuis la racine du projet:
 
 ```bash
-streamlit run frontend/streamlit_app.py
+cd frontend
+npm install
+npm run dev
 ```
 
 Fonctions:
-- charge centres/references via API
-- visualise graphe + chemin recommande
-- affiche destination, score, score_breakdown, rationale
-- bouton pour lancer le scenario principal et afficher KPI
-
-## One-command local demo runner
-
-Depuis la racine du projet:
-
-```bash
-python scripts/run_local_demo.py
-```
-
-Ce script:
-1. reset DB SQLite locale (sauf `--skip-reset`)
-2. init DB + seed reseau complexe
-3. genere rapports (`primary_demo_report`, `scenario_report`, `scenario_summary`)
-4. lance FastAPI et Streamlit
-
-Options:
-- `--api-port 8000`
-- `--ui-port 8501`
-- `--skip-reset`
+- Triage patient + recommandation
+- Gestion réseau (centres/références)
+- Indicateurs de santé
+- Graphe réseau 3D interactif (zoom, rotation, survol)
 
 ## Simulation et scenarios
 
@@ -198,6 +212,17 @@ Healthsites mapping rules implemented:
 ```bash
 cd backend
 pytest -q
+```
+
+## Qualité / CI
+
+- CI GitHub Actions:
+  - `.github/workflows/ci.yml` (backend + frontend)
+  - `.github/workflows/secret-scan.yml` (gitleaks)
+- Check local one-shot:
+
+```powershell
+.\scripts\check.ps1
 ```
 
 Couverture inclut:

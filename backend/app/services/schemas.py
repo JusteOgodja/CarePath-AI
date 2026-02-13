@@ -104,3 +104,15 @@ class IndicatorResponse(BaseModel):
     year: int
     value: float
     source_file: str | None
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=100)
+    password: str = Field(..., min_length=1, max_length=200)
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: Literal["bearer"] = "bearer"
+    role: Literal["admin", "viewer"]
+    username: str
